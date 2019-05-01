@@ -1,0 +1,95 @@
+import datetime
+import time
+import json
+import random
+import logging
+from flask import Flask, redirect, jsonify, render_template, request, session, abort, make_response
+from flask_login import login_required, login_user, logout_user, LoginManager, current_user
+
+from flask_cors import CORS
+import redis
+from dbTools import *
+# 引入OS模块中的产生一个24位的随机字符串的函数
+import os
+
+app = Flask(__name__, instance_relative_config=True)
+app.config['SECRET_KEY'] = '234rsdf34523rwsf'
+
+# 项目中设置flask_login
+login_manager = LoginManager()
+login_manager.init_app(app)
+
+# 解决跨域问题
+def jsonResponse(dump_json):
+    '''
+    参数值为已格式化的json
+    返回值为进行包装后的response
+    '''
+    res = make_response(dump_json)
+    res.headers['Access-Control-Allow-Origin'] = '*'
+    res.headers['Access-Control-Allow-Methods'] = 'POST,GET,PUT,DELETE,OPTIONS'
+    res.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
+    return res
+
+
+'''
+登录函数，首先实例化form对象
+然后通过form对象验证post接收到的数据格式是否正确
+然后通过login_auth函数，用username与password向数据库查询这个用户，并将状态码以及对象返回
+判断状态码，如果正确则将对象传入login_user中，然后就可以跳转到正确页面了
+'''
+@app.route('/login', methods=['POST'])
+def login():
+    phone_num = request.json['phone_num']
+    password = request.json['password']
+
+    result = login_auth(phone_num, password)
+    model = result[1]
+    if result[0]['isAuth']:
+        login_user(model)
+        print('登陆成功')
+        print(current_user.phone_num)  # 登录成功之后可以用current_user来取该用户的其他属性，这些属性都是sql语句查来并赋值给对象的。
+        dump_json = jsonify("login is success")
+        return jsonResponse(dump_json)
+    else:
+        print('登陆失败')
+        abort(400)
+
+
+'''
+load_user是一个flask_login的回调函数，在登陆之后，每访问一个带Login_required装饰的视图函数就要执行一次，
+该函数返回一个用户对象，通过id来用sql语句查到的用户数据，然后实例化一个对象，并返回。
+'''
+@login_manager.user_loader
+def load_user(phone_num):
+    return load_user_by_phone_num(phone_num)
+
+
+@app.route('/register', methods=['POST'])
+def register():
+    # if not session.get('logged_in'):
+    #     abort(401)
+    register_account(request.json)
+    return "register successfully"
+
+
+# 登陆成功跳转的视图函数
+@app.route('/t', methods=['GET'])
+@login_required
+def hello_world():
+    print('登录跳转')
+    return 'Hello World!'
+
+
+@app.route('/logout', methods=['DELETE'])
+@login_required
+def logout():
+    # session.pop('logged_in', None)
+    logout_user()
+    # flash('You were logged out')
+    return "logout"
+
+
+if __name__ == '__main__':
+    app.run(host="127.0.0.1", port=5000, debug=True)
+
