@@ -42,17 +42,17 @@ def login():
     model = result[1]
     if result[0]['isAuth']:
         login_user(model)
-        print('登陆成功')
+        print('登录成功')
         print(current_user.phone_num)  # 登录成功之后可以用current_user来取该用户的其他属性，这些属性都是sql语句查来并赋值给对象的。
         dump_json = jsonify("login is success")
         return jsonResponse(dump_json)
     else:
-        print('登陆失败')
+        print('登录失败')
         abort(400)
 
 
 '''
-load_user是一个flask_login的回调函数，在登陆之后，每访问一个带Login_required装饰的视图函数就要执行一次，
+load_user是一个flask_login的回调函数，在登录之后，每访问一个带Login_required装饰的视图函数就要执行一次，
 该函数返回一个用户对象，通过id来用sql语句查到的用户数据，然后实例化一个对象，并返回。
 '''
 @login_manager.user_loader
