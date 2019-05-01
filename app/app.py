@@ -32,12 +32,7 @@ def jsonResponse(dump_json):
     return res
 
 
-'''
-登录函数，首先实例化form对象
-然后通过form对象验证post接收到的数据格式是否正确
-然后通过login_auth函数，用username与password向数据库查询这个用户，并将状态码以及对象返回
-判断状态码，如果正确则将对象传入login_user中，然后就可以跳转到正确页面了
-'''
+# 登录函数
 @app.route('/login', methods=['POST'])
 def login():
     phone_num = request.json['phone_num']
@@ -65,6 +60,7 @@ def load_user(phone_num):
     return load_user_by_phone_num(phone_num)
 
 
+# 注册函数
 @app.route('/register', methods=['POST'])
 def register():
     # if not session.get('logged_in'):
@@ -73,14 +69,7 @@ def register():
     return "register successfully"
 
 
-# 登陆成功跳转的视图函数
-@app.route('/t', methods=['GET'])
-@login_required
-def hello_world():
-    print('登录跳转')
-    return 'Hello World!'
-
-
+# 注销登录函数
 @app.route('/logout', methods=['DELETE'])
 @login_required
 def logout():
