@@ -33,7 +33,7 @@ def jsonResponse(dump_json):
 
 
 # 登录函数
-@app.route('/login', methods=['POST'])
+@app.route('/module/login', methods=['POST'])
 def login():
     phone_num = request.json['phone_num']
     password = request.json['password']
@@ -61,7 +61,7 @@ def load_user(phone_num):
 
 
 # 注册函数
-@app.route('/register', methods=['POST'])
+@app.route('/module/register', methods=['POST'])
 def register():
     # if not session.get('logged_in'):
     #     abort(401)
@@ -70,7 +70,7 @@ def register():
 
 
 # 注销登录函数
-@app.route('/logout', methods=['DELETE'])
+@app.route('/module/logout', methods=['DELETE'])
 @login_required
 def logout():
     # session.pop('logged_in', None)
@@ -80,5 +80,5 @@ def logout():
 
 
 if __name__ == '__main__':
-    app.run(host="127.0.0.1", port=5000, debug=True)
+    app.run(host='localhost', port=8080, debug=True)
 
