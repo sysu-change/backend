@@ -29,6 +29,7 @@ cursor.close()
 # create tools
 tools = Tools()
 
+
 # 创建一个类，用来通过sql语句查询结果实例化对象用
 class User_mod():
     def __init__(self):
@@ -49,6 +50,7 @@ class User_mod():
 
     def get_id(self):
         return self.phone_num
+
 
 def login_auth(phone_num, password):
     print('login_auth')
@@ -76,6 +78,7 @@ def load_user_by_phone_num(phone_num):
         result['isAuth'] = True
         model.phone_num = rows_['phone_num']
     return model
+
 
 def register_account(account):
     sid = account['sid']
