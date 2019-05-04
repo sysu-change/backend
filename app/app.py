@@ -35,20 +35,29 @@ def jsonResponse(dump_json):
 # 登录函数
 @app.route('/module/login', methods=['POST'])
 def login():
-    phone_num = request.json['phone_num']
-    password = request.json['password']
+    user = request.json
+    phone_num = user.get('phone_num', None)
+    password = user.get('password', None)
+    # phone_num = request.json['phone_num']
+    # password = request.json['password']
 
     result = login_auth(phone_num, password)
     model = result[1]
     if result[0]['isAuth']:
         login_user(model)
-        print('登录成功')
-        print(current_user.phone_num)  # 登录成功之后可以用current_user来取该用户的其他属性，这些属性都是sql语句查来并赋值给对象的。
-        dump_json = jsonify("login is success")
-        return jsonResponse(dump_json)
+        code = 200
+        msg = "successful"
+        # print(current_user.phone_num)  # 登录成功之后可以用current_user来取该用户的其他属性，这些属性都是sql语句查来并赋值给对象的。
+        # dump_json = jsonify("login is success")
+        # return jsonResponse(dump_json)
+    elif phone_num==None or password==None:
+        code = 400
+        msg = "Illegal_parameter"
     else:
-        print('登录失败')
-        abort(400)
+        code = 400
+        msg = "error_account_or_password"
+        # abort(400)
+    return python_object_to_json(code, msg)
 
 
 '''
@@ -65,8 +74,10 @@ def load_user(phone_num):
 def register():
     # if not session.get('logged_in'):
     #     abort(401)
-    register_account(request.json)
-    return "register successfully"
+
+    code, msg = register_account(request.json)
+    return python_object_to_json(code, msg)
+    # return "register successfully"
 
 
 # 注销登录函数
@@ -75,9 +86,18 @@ def register():
 def logout():
     # session.pop('logged_in', None)
     logout_user()
+    code = 200
+    msg = "successful"
+    return python_object_to_json(code, msg)
     # flash('You were logged out')
-    return "logout"
 
+
+def python_object_to_json(code, msg):
+    python2json = {}
+    python2json["code"] = code
+    python2json["msg"] = msg
+    json_str = json.dumps(python2json)
+    return json_str
 
 if __name__ == '__main__':
     app.run(host='localhost', port=8080, debug=True)

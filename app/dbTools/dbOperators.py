@@ -1,10 +1,12 @@
 import pymysql
 from DBUtils.PooledDB import PooledDB
+import sys
+sys.path.append('../match/')
+import match
 from .tools import *
 import io
 import sys
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-
 from .dbConfig import *
 
 # 打开数据库连接
@@ -80,16 +82,57 @@ def load_user_by_phone_num(phone_num):
     return model
 
 
+def select_user_by_phone_num(phone_num):
+    print('select_user_by_phone_num')
+    sql = "SELECT * FROM account WHERE phone_num ='%s'" % (phone_num)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return True
+    else:
+        return False
+
+
+def select_user_by_sid(sid):
+    print('select_user_by_sid')
+    sql = "SELECT * FROM account WHERE sid ='%s'" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return True
+    else:
+        return False
+
+
 def register_account(account):
-    sid = account['sid']
-    name = account['name']
-    age = account['age']
-    sex = account['sex']
-    grade = account['grade']
-    major = account['major']
-    phone_num = account['phone_num']
-    password = account['password']
-    sql = """INSERT INTO account(sid, name, age, sex, grade, major, phone_num, password)
-                                    VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s");""" % (
-    sid, name, age, sex, grade, major, phone_num, password)
-    tools.modifyOpt(sql)
+    sid = account.get('sid', None)
+    name = account.get('name', None)
+    age = account.get('age', None)
+    sex = account.get('sex', None)
+    grade = account.get('grade', None)
+    major = account.get('major', None)
+    phone_num = account.get('phone_num', None)
+    password = account.get('password', None)
+
+    msg = ""
+    if sid == None or name ==None or age ==None or grade == None or major==None or phone_num==None or password==None:
+        msg += "Illegal_parameter."
+    if not isinstance(age, int):
+        msg += "Illegal_parameter."
+    if not match.match_phone(phone_num):
+        msg += "error_phone."
+    # if not match.match_password(password):
+    #    msg += "error_password."
+    if select_user_by_phone_num(phone_num):
+        msg += "already_exists_phone."
+    if select_user_by_sid(sid):
+        msg += "already_exists_sid."
+    if msg == "":
+        sql = """INSERT INTO account(sid, name, age, sex, grade, major, phone_num, password)
+                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s");""" % (
+            sid, name, age, sex, grade, major, phone_num, password)
+        tools.modifyOpt(sql)
+        msg += "successful"
+        code = 200
+    else:
+        code = 400
+    return code, msg
+
