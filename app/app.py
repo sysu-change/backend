@@ -5,7 +5,7 @@ import random
 import logging
 from flask import Flask, redirect, jsonify, render_template, request, session, abort, make_response
 from flask_login import login_required, login_user, logout_user, LoginManager, current_user
-
+from flask import current_app
 from flask_cors import CORS
 import redis
 from dbTools import *
@@ -13,7 +13,9 @@ from dbTools import *
 import os
 
 app = Flask(__name__, instance_relative_config=True)
-app.config['SECRET_KEY'] = '234rsdf34523rwsf'
+# app.config['SECRET_KEY'] = '234rsdf34523rwsf'
+app.config['SECRET_KEY'] = os.urandom(24)  # 设置随机字符,每次运行服务器都是不同的，所以服务器启动一次上次的session就清除
+# app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 设置session的保存时间
 
 # 项目中设置flask_login
 login_manager = LoginManager()
@@ -35,38 +37,25 @@ def jsonResponse(dump_json):
 # 登录函数
 @app.route('/module/login', methods=['POST'])
 def login():
+    # current_app.logger.info('123')
+    # current_app.logger.info(request.json)
+
     user = request.json
     phone_num = user.get('phone_num', None)
     password = user.get('password', None)
-    # phone_num = request.json['phone_num']
-    # password = request.json['password']
 
-    result = login_auth(phone_num, password)
-    model = result[1]
-    if result[0]['isAuth']:
-        login_user(model)
+    isAuth = login_auth(phone_num, password)
+    if isAuth:
         code = 200
         msg = "successful"
-        # print(current_user.phone_num)  # 登录成功之后可以用current_user来取该用户的其他属性，这些属性都是sql语句查来并赋值给对象的。
-        # dump_json = jsonify("login is success")
-        # return jsonResponse(dump_json)
-    elif phone_num==None or password==None:
+    elif phone_num == None or password == None:
         code = 400
         msg = "Illegal_parameter"
     else:
         code = 400
-        msg = "error_account_or_password"
-        # abort(400)
-    return python_object_to_json(code, msg)
-
-
-'''
-load_user是一个flask_login的回调函数，在登录之后，每访问一个带Login_required装饰的视图函数就要执行一次，
-该函数返回一个用户对象，通过id来用sql语句查到的用户数据，然后实例化一个对象，并返回。
-'''
-@login_manager.user_loader
-def load_user(phone_num):
-    return load_user_by_phone_num(phone_num)
+        msg = "error_password"
+    current_app.logger.info(dict(session))
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 注册函数
@@ -76,29 +65,63 @@ def register():
     #     abort(401)
 
     code, msg = register_account(request.json)
-    return python_object_to_json(code, msg)
+    return python_object_to_json(code=code, msg=msg)
     # return "register successfully"
 
 
 # 注销登录函数
 @app.route('/module/logout', methods=['DELETE'])
-@login_required
+@login_required_mine
 def logout():
     # session.pop('logged_in', None)
-    logout_user()
+    session.pop('sid')
+    session.pop('name')
+    session.pop('age')
+    session.pop('sex')
+    session.pop('grade')
+    session.pop('major')
+    session.pop('phone_num')
+    session.pop('balance')
+
     code = 200
     msg = "successful"
-    return python_object_to_json(code, msg)
+    current_app.logger.info(dict(session))
+    return python_object_to_json(code=code, msg=msg)
     # flash('You were logged out')
 
 
-def python_object_to_json(code, msg):
-    python2json = {}
-    python2json["code"] = code
-    python2json["msg"] = msg
-    json_str = json.dumps(python2json)
-    return json_str
+# 获取用户资料
+@app.route('/module/user/userinfo', methods=['GET'])
+def userinfo():
+    code = 200
+    s_ID = session.get('sid')
+    age = session.get('age')
+    major = session.get('major')
+    sex = session.get('sex')
+    phone_num = session.get('phone_num')
+    account_left = session.get('balance')
+    return python_object_to_json(code=code, s_ID=s_ID, age=age, major=major, sex=sex,
+                                 phone_num=phone_num, account_left=account_left)
+
+
+# 问卷预览页面数据请求
+@app.route('/module/user/questionnaire_pre', methods=['GET'])
+def questionnaire_pre():
+    pass
+
+
+# 问卷提交
+@app.route('/module/user/put_forward', methods=['POST'])
+def put_forward():
+    pass
+
+
+# 问卷数据格式
+@app.route('/module/user/questionnaire', methods=['GET'])
+def questionnaire():
+    pass
+
 
 if __name__ == '__main__':
-    app.run(host='localhost', port=8080, debug=True)
-
+    CORS(app, supports_credentials=True)
+    app.run(host='localhost', port=8082, debug=True)

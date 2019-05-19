@@ -3,11 +3,13 @@ from DBUtils.PooledDB import PooledDB
 import sys
 sys.path.append('../match/')
 import match
+from functools import wraps
 from .tools import *
 import io
 import sys
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 from .dbConfig import *
+from flask import current_app, session
 
 # 打开数据库连接
 db = pymysql.connect(host=DB_HOST,
@@ -55,35 +57,46 @@ class User_mod():
 
 
 def login_auth(phone_num, password):
-    print('login_auth')
-    result = {'isAuth': False}
-    model = User_mod()  # 实例化一个对象，将查询结果逐一添加给对象的属性
+    # current_app.logger.info('login_auth')
+    current_app.logger.info(dict(session))
+
+    isAuth = False
     sql = "SELECT * FROM account WHERE phone_num ='%s' AND password = '%s'" % (
     phone_num, password)
     rows = tools.selectOpt(sql)
-    print('查询结果>>>', rows)
+    # current_app.logger.info('查询结果>>>', rows)
     if rows:
         rows_ = rows[0]
-        result['isAuth'] = True
-        model.phone_num = rows_['phone_num']
-    return result, model
+        isAuth = True
+        session['sid'] = rows_['sid']
+        session['name'] = rows_['name']
+        session['age'] = rows_['age']
+        session['sex'] = rows_['sex']
+        if session['sex'] == '0':
+            session['sex'] = u'男'
+        if session['sex'] == '1':
+            session['sex'] = u'女'
+        session['grade'] = rows_['grade']
+        session['major'] = rows_['major']
+        session['phone_num'] = rows_['phone_num']
+        session['balance'] = rows_['balance']
+    return isAuth
 
 
-def load_user_by_phone_num(phone_num):
-    print('load_user_by_phone_num')
-    sql = "SELECT * FROM account WHERE phone_num ='%s'" % (phone_num)
-    model = User_mod()  # 实例化一个对象，将查询结果逐一添加给对象的属性
-    rows = tools.selectOpt(sql)
-    if rows:
-        rows_ = rows[0]
-        result = {'isAuth': False}
-        result['isAuth'] = True
-        model.phone_num = rows_['phone_num']
-    return model
+def login_required_mine(func):
+    @wraps(func)
+    def decorated_view(*args, **kwargs):
+        if not session.get('phone_num'):
+            code = 401
+            msg = "not login"
+            return python_object_to_json(code=code, msg=msg)
+        return func(*args, **kwargs)
+
+    return decorated_view
 
 
 def select_user_by_phone_num(phone_num):
-    print('select_user_by_phone_num')
+    # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM account WHERE phone_num ='%s'" % (phone_num)
     rows = tools.selectOpt(sql)
     if rows:
@@ -93,7 +106,7 @@ def select_user_by_phone_num(phone_num):
 
 
 def select_user_by_sid(sid):
-    print('select_user_by_sid')
+    # current_app.logger.info('select_user_by_sid')
     sql = "SELECT * FROM account WHERE sid ='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
@@ -113,9 +126,8 @@ def register_account(account):
     password = account.get('password', None)
 
     msg = ""
-    if sid == None or name ==None or age ==None or grade == None or major==None or phone_num==None or password==None:
-        msg += "Illegal_parameter."
-    if not isinstance(age, int):
+    if sid == None or name == None or age == None or grade == None or major == None\
+            or phone_num==None or password==None or (not isinstance(age, int)):
         msg += "Illegal_parameter."
     if not match.match_phone(phone_num):
         msg += "error_phone."
@@ -126,8 +138,8 @@ def register_account(account):
     if select_user_by_sid(sid):
         msg += "already_exists_sid."
     if msg == "":
-        sql = """INSERT INTO account(sid, name, age, sex, grade, major, phone_num, password)
-                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s");""" % (
+        sql = """INSERT INTO account(sid, name, age, sex, grade, major, phone_num, password, balance)
+                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s", "0");""" % (
             sid, name, age, sex, grade, major, phone_num, password)
         tools.modifyOpt(sql)
         msg += "successful"
@@ -135,4 +147,12 @@ def register_account(account):
     else:
         code = 400
     return code, msg
+
+
+def python_object_to_json(**kwargs):
+    python2json = {}
+    for i in kwargs.items():
+        python2json[i[0]] = i[1]
+    json_str = json.dumps(python2json)
+    return json_str
 
