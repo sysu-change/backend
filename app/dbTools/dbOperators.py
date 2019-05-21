@@ -59,9 +59,13 @@ class User_mod():
 def login_auth(phone_num, password):
     # current_app.logger.info('login_auth')
     current_app.logger.info(dict(session))
+    salt = select_salt_by_phone_num(phone_num)
 
+    if salt =="":
+        return False
+    password = match.hash_password(password,salt)
     isAuth = False
-    sql = "SELECT * FROM account WHERE phone_num ='%s' AND password = '%s'" % (
+    sql = "SELECT * FROM accounts WHERE phone_num ='%s' AND password = '%s'" % (
     phone_num, password)
     rows = tools.selectOpt(sql)
     # current_app.logger.info('查询结果>>>', rows)
@@ -97,7 +101,7 @@ def login_required_mine(func):
 
 def select_user_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
-    sql = "SELECT * FROM account WHERE phone_num ='%s'" % (phone_num)
+    sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
     rows = tools.selectOpt(sql)
     if rows:
         return True
@@ -105,9 +109,20 @@ def select_user_by_phone_num(phone_num):
         return False
 
 
+
+def select_salt_by_phone_num(phone_num):
+    # current_app.logger.info('select_user_by_phone_num')
+    sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        return rows_['salt']
+    else:
+        return ""
+
 def select_user_by_sid(sid):
     # current_app.logger.info('select_user_by_sid')
-    sql = "SELECT * FROM account WHERE sid ='%s'" % (sid)
+    sql = "SELECT * FROM accounts WHERE sid ='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         return True
@@ -124,23 +139,29 @@ def register_account(account):
     major = account.get('major', None)
     phone_num = account.get('phone_num', None)
     password = account.get('password', None)
-
+    # 密码加密逻辑，生成26位字符串，对前端传来的密码进行盐值加密之后存进数据库
+    salt = match.random_code(26)
+    password = match.hash_password(password,salt)
     msg = ""
     if sid == None or name == None or age == None or grade == None or major == None\
             or phone_num==None or password==None or (not isinstance(age, int)):
-        msg += "Illegal_parameter."
+        msg += "Illegal_parameter"
+        return 400, msg
     if not match.match_phone(phone_num):
-        msg += "error_phone."
+        msg += "error_phone"
+        return 400, msg
     # if not match.match_password(password):
     #    msg += "error_password."
     if select_user_by_phone_num(phone_num):
-        msg += "already_exists_phone."
+        msg += "already_exists_phone"
+        return 400, msg
     if select_user_by_sid(sid):
-        msg += "already_exists_sid."
+        msg += "already_exists_sid"
+        return 400, msg
     if msg == "":
-        sql = """INSERT INTO account(sid, name, age, sex, grade, major, phone_num, password, balance)
-                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s", "0");""" % (
-            sid, name, age, sex, grade, major, phone_num, password)
+        sql = """INSERT INTO accounts(sid, name, age, sex, grade, major, phone_num, password, balance,salt)
+                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s", "0","%s");""" % (
+            sid, name, age, sex, grade, major, phone_num, password, salt)
         tools.modifyOpt(sql)
         msg += "successful"
         code = 200

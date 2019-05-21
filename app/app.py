@@ -92,6 +92,7 @@ def logout():
 
 # 获取用户资料
 @app.route('/module/user/userinfo', methods=['GET'])
+@login_required_mine
 def userinfo():
     code = 200
     s_ID = session.get('sid')
@@ -106,18 +107,21 @@ def userinfo():
 
 # 问卷预览页面数据请求
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
+@login_required_mine
 def questionnaire_pre():
     pass
 
 
 # 问卷提交
 @app.route('/module/user/put_forward', methods=['POST'])
+@login_required_mine
 def put_forward():
     pass
 
 
 # 问卷数据格式
 @app.route('/module/user/questionnaire', methods=['GET'])
+@login_required_mine
 def questionnaire():
     pass
 
