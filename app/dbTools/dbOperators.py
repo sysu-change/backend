@@ -75,12 +75,8 @@ def login_auth(phone_num, password):
         session['sid'] = rows_['sid']
         session['name'] = rows_['name']
         session['age'] = rows_['age']
-        session['sex'] = rows_['sex']
-        if session['sex'] == '0':
-            session['sex'] = u'男'
-        if session['sex'] == '1':
-            session['sex'] = u'女'
-        session['grade'] = rows_['grade']
+        session['sex'] = match.sex_trans(rows_['sex'])
+        session['grade'] = match.grade_trans(rows_['grade'])
         session['major'] = rows_['major']
         session['phone_num'] = rows_['phone_num']
         session['balance'] = rows_['balance']
@@ -109,7 +105,6 @@ def select_user_by_phone_num(phone_num):
         return False
 
 
-
 def select_salt_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -119,6 +114,7 @@ def select_salt_by_phone_num(phone_num):
         return rows_['salt']
     else:
         return ""
+
 
 def select_user_by_sid(sid):
     # current_app.logger.info('select_user_by_sid')
@@ -172,6 +168,29 @@ def register_account(account):
     else:
         code = 400
     return code, msg
+
+
+def edit_userinfo_model(sid,account):
+    name = account.get('name', None)
+    age = account.get('age', None)
+    sex = account.get('sex', None)
+    grade = account.get('grade', None)
+    major = account.get('major', None)
+    msg = ""
+    if  name == None or age == None or grade == None or major == None or sex ==None \
+             or (not isinstance(age, int)) or (not isinstance(sex, int)) or (not isinstance(grade, int)):
+        msg += "Illegal_parameter"
+        return 400, msg
+    sql = """UPDATE accounts SET name ="%s",age = "%s", sex="%s",grade="%s",major="%s"WHERE sid= "%s";""" % (
+                 name, age, sex, grade, major, sid)
+    tools.modifyOpt(sql)
+    msg += "successful"
+    session['name'] = name
+    session['age'] = age
+    session['sex'] = match.sex_trans(sex)
+    session['grade'] = match.grade_trans(grade)
+    session['major'] = major
+    return 200, msg
 
 
 def python_object_to_json(**kwargs):

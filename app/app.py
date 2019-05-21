@@ -94,15 +94,25 @@ def logout():
 @app.route('/module/user/userinfo', methods=['GET'])
 @login_required_mine
 def userinfo():
-    code = 200
-    s_ID = session.get('sid')
+    name = session.get('name')
+    sid = session.get('sid')
     age = session.get('age')
     major = session.get('major')
+    grade = session.get('grade')
     sex = session.get('sex')
     phone_num = session.get('phone_num')
-    account_left = session.get('balance')
-    return python_object_to_json(code=code, s_ID=s_ID, age=age, major=major, sex=sex,
-                                 phone_num=phone_num, account_left=account_left)
+    balance = session.get('balance')
+    return python_object_to_json(name=name, sid=sid, age=age, major=major, grade=grade,
+                                 sex=sex, phone_num=phone_num, balance=balance)
+
+
+# 修改用户资料
+@app.route('/module/user/userinfo', methods=['PUT'])
+@login_required_mine
+def edit_userinfo():
+    sid = session.get('sid')
+    code, msg = edit_userinfo_model(sid, request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 问卷预览页面数据请求
