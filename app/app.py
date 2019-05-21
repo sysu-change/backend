@@ -115,6 +115,23 @@ def edit_userinfo():
     return python_object_to_json(code=code, msg=msg)
 
 
+# 账户充值
+@app.route('/user/recharge', methods=['POST'])
+@login_required_mine
+def user_recharge():
+    code, msg = user_recharge_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
+# 账户提现
+@app.route('/user/withdraw', methods=['POST'])
+@login_required_mine
+def user_withdraw():
+    sid = session.get('sid')
+    code, msg = user_withdraw_model(sid, request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
 # 问卷预览页面数据请求
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
 @login_required_mine
