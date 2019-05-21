@@ -147,11 +147,15 @@ def register_account(account):
             or phone_num==None or password==None or (not isinstance(age, int)):
         msg += "Illegal_parameter"
         return 400, msg
+    if not match.match_sid(sid):
+        msg += "error_sid"
+        return 400, msg
     if not match.match_phone(phone_num):
         msg += "error_phone"
         return 400, msg
-    # if not match.match_password(password):
-    #    msg += "error_password."
+    if not match.match_password(password):
+        msg += "error_password."
+        return 400, msg
     if select_user_by_phone_num(phone_num):
         msg += "already_exists_phone"
         return 400, msg
