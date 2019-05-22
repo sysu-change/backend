@@ -160,9 +160,6 @@ def register_account(account):
     if not match.match_phone(phone_num):
         msg += "error_phone"
         return 400, msg
-    if not match.match_password(password):
-        msg += "error_password."
-        return 400, msg
     if select_user_by_phone_num(phone_num):
         msg += "already_exists_phone"
         return 400, msg
@@ -237,9 +234,6 @@ def user_withdraw_model(sid, account):
     if not match.match_phone(pay_phone):
         msg += "error_phone"
         return 400, msg
-    if not match.match_password(password):
-        msg += "error_password"
-        return 400, msg
     if money > session['balance']:
         msg += "not_enough_account_balance"
         return 400, msg
@@ -256,6 +250,38 @@ def user_withdraw_model(sid, account):
     session['balance'] = session['balance'] - money
     return 200, msg
 
+# 还没做好  有bug
+def create_questionnaire_model(account):
+    sid = account.get('sid', None)
+    title = account.get('title', None)
+    description = account.get('description', None)
+    edit_status = account.get('edit_status', None)
+    reward = account.get('reward', None)
+    quantity = account.get('quantity', None)
+    pub_time = account.get('pub_time', None)
+    content = account.get('content', None)
+    current_app.logger.info("2222222")
+    msg =""
+    if sid == None or title == None or description== None or edit_status == None or pub_time==None\
+        or reward == None or quantity == None or content== None or (not isinstance(edit_status, int)):
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not session['sid'] == sid:
+        msg += "publisher_must_be_your_own"
+        return 400, msg
+    if not isinstance(quantity, int):
+        msg += "quantity_must_be_int"
+        return 400, msg
+    if not isinstance(reward , float):
+        msg += "quantity_must_be_float"
+        return 400, msg
+    current_app.logger.info("333333")
+    sql = """INSERT INTO questiontable(qid,sid, title, description, edit_status, quantity, reward, pub_time, content)
+                                                VALUES (1,"%s", "%s", "%s", %d ,%d, %f,"%s","%s");""" % (
+        sid, title, description, edit_status, quantity, reward, pub_time, content)
+    tools.modifyOpt(sql)
+    msg += "successful"
+    return 200,msg
 
 
 def python_object_to_json(**kwargs):

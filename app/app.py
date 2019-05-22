@@ -117,8 +117,10 @@ def edit_userinfo():
 
 # 账户充值
 @app.route('/user/recharge', methods=['POST'])
-@login_required_mine
+#@login_required_mine
 def user_recharge():
+    sid = session.get('sid')
+    current_app.logger.info(sid)
     code, msg = user_recharge_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
@@ -129,6 +131,15 @@ def user_recharge():
 def user_withdraw():
     sid = session.get('sid')
     code, msg = user_withdraw_model(sid, request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
+# 创建问卷  还不行 有bug
+@app.route('/module/user/create_questionnaire', methods=['POST'])
+@login_required_mine
+def create_questionnaire():
+    current_app.logger.info("6666666666")
+    code, msg = create_questionnaire_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
