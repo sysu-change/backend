@@ -134,12 +134,19 @@ def user_withdraw():
     return python_object_to_json(code=code, msg=msg)
 
 
-# 创建问卷  还不行 有bug
+# 创建问卷
 @app.route('/module/user/create_questionnaire', methods=['POST'])
 @login_required_mine
 def create_questionnaire():
-    current_app.logger.info("6666666666")
     code, msg = create_questionnaire_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
+# 修改编辑问卷
+@app.route('/module/user/edit_questionnaire', methods=['PUT'])
+@login_required_mine
+def edit_questionnaire():
+    code, msg = edit_questionnaire_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
