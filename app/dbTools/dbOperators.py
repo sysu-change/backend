@@ -95,6 +95,7 @@ def login_required_mine(func):
     return decorated_view
 
 
+# 根据手机号查找是否拥有该用户
 def select_user_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -105,6 +106,7 @@ def select_user_by_phone_num(phone_num):
         return False
 
 
+# 根据收据号获取盐值
 def select_salt_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -116,6 +118,7 @@ def select_salt_by_phone_num(phone_num):
         return ""
 
 
+# 根据手机号获取密码
 def select_password_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -127,6 +130,7 @@ def select_password_by_phone_num(phone_num):
         return ""
 
 
+# 查找是否拥有该用户id
 def select_user_by_sid(sid):
     # current_app.logger.info('select_user_by_sid')
     sql = "SELECT * FROM accounts WHERE sid ='%s'" % (sid)
@@ -137,6 +141,7 @@ def select_user_by_sid(sid):
         return False
 
 
+# 查找是否含有该问卷id
 def select_questionnaire_by_qid(qid):
     # current_app.logger.info('select_user_by_sid')
     sql = "SELECT * FROM questiontable WHERE qid ='%s'" % (qid)
@@ -145,6 +150,32 @@ def select_questionnaire_by_qid(qid):
         return True
     else:
         return False
+
+
+# 根据问卷id获取问卷状态
+def select_questionnaire_status_by_qid(qid):
+    # current_app.logger.info('select_user_by_sid')
+    sql = "SELECT * FROM questiontable WHERE qid ='%s'" % (qid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        return rows_['edit_status']
+    else:
+        return 9999
+
+
+# 根据学号增加账户余额
+def add_balance_by_sid(sid,money):
+    sql = """UPDATE accounts SET balance = balance+"%s"WHERE sid = "%s";""" % (
+        money, sid)
+    tools.modifyOpt(sql)
+
+
+# 根据学号减少账户余额
+def reduce_balance_by_sid(sid,money):
+    sql = """UPDATE accounts SET balance = balance-"%s"WHERE sid = "%s";""" % (
+        money, sid)
+    tools.modifyOpt(sql)
 
 
 def register_account(account):
@@ -285,10 +316,18 @@ def create_questionnaire_model(account):
     if not isinstance(reward , float):
         msg += "quantity_must_be_float"
         return 400, msg
+    if edit_status == 1:
+        cost = reward * quantity
+        if cost > session['balance']:
+            msg += "Insufficient_account_balance"
+            return 400, msg
     sql = """INSERT INTO questiontable(sid, title, description, edit_status, quantity, reward, pub_time, content)
                                                 VALUES ("%s", "%s", "%s", %d ,%d, %f,"%s","%s");""" % (
         sid, title, description, edit_status, quantity, reward, pub_time, content)
     tools.modifyOpt(sql)
+    if edit_status == 1:
+        reduce_balance_by_sid(session['sid'], cost)
+        session['balance'] = session['balance'] - cost
     msg += "successful"
     return 200, msg
 
@@ -315,20 +354,27 @@ def edit_questionnaire_model(account):
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
         return 400, msg
-    if not isinstance(reward , float):
+    if not isinstance(reward, float):
         msg += "quantity_must_be_float"
         return 400, msg
     if not select_questionnaire_by_qid(qid):
         msg += "maybe_error_qid"
         return 400, msg
-
-    # todo 不需要sid的传入，没有意义
-    # todo 发布中的问卷不能被修改
-
+    if select_questionnaire_status_by_qid(qid) == 1:
+        msg += "questionnaire_in_release_cannot_be_modified"
+        return 400, msg
+    if edit_status == 1:
+        cost = reward * quantity
+        if cost > session['balance']:
+            msg += "Insufficient_account_balance"
+            return 400, msg
     sql = """UPDATE questiontable SET title ="%s",description = "%s", edit_status=%d,
             reward=%f, quantity=%d, pub_time="%s", content="%s"WHERE qid= "%s";""" % (
         title, description, edit_status, reward, quantity, pub_time, content, qid)
     tools.modifyOpt(sql)
+    if edit_status == 1:
+        reduce_balance_by_sid(session['sid'], cost)
+        session['balance'] = session['balance'] - cost
     msg += "successful"
     return 200, msg
 
