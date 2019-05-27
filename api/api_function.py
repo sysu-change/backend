@@ -1,7 +1,6 @@
 import pymysql
 from DBUtils.PooledDB import PooledDB
 import sys
-sys.path.append('../match/')
 from functools import wraps
 import io
 import sys
@@ -10,7 +9,7 @@ from flask import current_app, session
 import json
 
 from dbTools import *
-import match
+from .match import *
 
 # 打开数据库连接
 db = pymysql.connect(host=DB_HOST,
@@ -42,9 +41,9 @@ def login_auth(phone_num, password):
     current_app.logger.info(dict(session))
     salt = select_salt_by_phone_num(phone_num)
 
-    if salt =="":
+    if salt == "":
         return False
-    password = match.hash_password(password,salt)
+    password = hash_password(password, salt)
     isAuth = False
     sql = "SELECT * FROM accounts WHERE phone_num ='%s' AND password = '%s'" % (
     phone_num, password)
@@ -56,8 +55,8 @@ def login_auth(phone_num, password):
         session['sid'] = rows_['sid']
         session['name'] = rows_['name']
         session['age'] = rows_['age']
-        session['sex'] = match.sex_trans(rows_['sex'])
-        session['grade'] = match.grade_trans(rows_['grade'])
+        session['sex'] = sex_trans(rows_['sex'])
+        session['grade'] = grade_trans(rows_['grade'])
         session['major'] = rows_['major']
         session['phone_num'] = rows_['phone_num']
         session['balance'] = rows_['balance']
@@ -179,17 +178,17 @@ def register_account(account):
 
 
     # 密码加密逻辑，生成26位字符串，对前端传来的密码进行盐值加密之后存进数据库
-    salt = match.random_code(26)
-    password = match.hash_password(password, salt)
+    salt = random_code(26)
+    password = hash_password(password, salt)
     msg = ""
     if sid == None or name == None or age == None or grade == None or major == None\
             or phone_num==None or password==None or (not isinstance(age, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    if not match.match_sid(sid):
+    if not match_sid(sid):
         msg += "error_sid"
         return 400, msg
-    if not match.match_phone(phone_num):
+    if not match_phone(phone_num):
         msg += "error_phone"
         return 400, msg
     if select_user_by_phone_num(phone_num):
@@ -229,8 +228,8 @@ def edit_userinfo_model(sid, account):
     msg += "successful"
     session['name'] = name
     session['age'] = age
-    session['sex'] = match.sex_trans(sex)
-    session['grade'] = match.grade_trans(grade)
+    session['sex'] = sex_trans(sex)
+    session['grade'] = grade_trans(grade)
     session['major'] = major
     return 200, msg
 
@@ -244,7 +243,7 @@ def user_recharge_model(account):
     if phone_num == None or money == None or (not isinstance(money, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    if not match.match_phone(phone_num):
+    if not match_phone(phone_num):
         msg += "error_phone"
         return 400, msg
     if not select_user_by_phone_num(phone_num):
@@ -269,14 +268,14 @@ def user_withdraw_model(sid, account):
     if pay_phone == None or password == None or (not isinstance(money, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    if not match.match_phone(pay_phone):
+    if not match_phone(pay_phone):
         msg += "error_phone"
         return 400, msg
     if money > session['balance']:
         msg += "not_enough_account_balance"
         return 400, msg
     salt = select_salt_by_phone_num(session['phone_num'])
-    password = match.hash_password(password, salt)
+    password = hash_password(password, salt)
     right_pass = select_password_by_phone_num(session['phone_num'])
     if not password == right_pass:
         msg += "error_password"
