@@ -11,7 +11,7 @@ import json
 
 
 from .dbConfig import *
-from .tools import Tools as Tools
+from .dbTools import dbTools as dbTools
 import match
 
 # 打开数据库连接
@@ -34,7 +34,7 @@ for row in tables:
 cursor.close()
 
 # create tools
-tools = Tools()
+tools = dbTools()
 
 
 # 登录函数
@@ -81,6 +81,8 @@ def login_required_mine(func):
 
 
 # 根据手机号查找是否拥有该用户
+# serve for user_recharge_model
+# serve for register_account
 def select_user_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -92,6 +94,8 @@ def select_user_by_phone_num(phone_num):
 
 
 # 根据收据号获取盐值
+# serve for login_auth
+# serve for user_withdraw_model
 def select_salt_by_phone_num(phone_num):
     # current_app.logger.info('select_user_by_phone_num')
     sql = "SELECT * FROM accounts WHERE phone_num ='%s'" % (phone_num)
@@ -260,7 +264,7 @@ def user_recharge_model(account):
 # 创建问卷
 # used in /module/user/create_questionnaire
 def user_withdraw_model(sid, account):
-    pay_phone = account.get('pay_phone',None)
+    pay_phone = account.get('pay_phone', None)
     password = account.get('password', None)
     money = account.get('money', None)
     msg = ""
