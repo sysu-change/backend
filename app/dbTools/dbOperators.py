@@ -3,13 +3,15 @@ from DBUtils.PooledDB import PooledDB
 import sys
 sys.path.append('../match/')
 from functools import wraps
-from .tools import *
 import io
 import sys
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
-from .dbConfig import *
 from flask import current_app, session
+import json
 
+
+from .dbConfig import *
+from .tools import Tools as Tools
 import match
 
 # 打开数据库连接
@@ -20,7 +22,7 @@ db = pymysql.connect(host=DB_HOST,
                      database=DB_DATABASE,
                      charset=DB_CHARSET)
 
-# convert character
+# 使用cursor()方法获取操作游标
 cursor = db.cursor()
 
 cursor.execute('SHOW TABLES')
@@ -35,28 +37,8 @@ cursor.close()
 tools = Tools()
 
 
-# 创建一个类，用来通过sql语句查询结果实例化对象用
-class User_mod():
-    def __init__(self):
-        self.phone_num = None
-
-    def todict(self):
-        return self.__dict__
-
-    # 下面这4个方法是flask_login需要的4个验证方式
-    def is_authenticated(self):
-        return True
-
-    def is_active(self):
-        return True
-
-    def is_anonymous(self):
-        return False
-
-    def get_id(self):
-        return self.phone_num
-
-
+# 登录函数
+# used in /module/login
 def login_auth(phone_num, password):
     # current_app.logger.info('login_auth')
     current_app.logger.info(dict(session))
@@ -84,6 +66,8 @@ def login_auth(phone_num, password):
     return isAuth
 
 
+# 确认是否登录的函数
+# used in all api needs login before
 def login_required_mine(func):
     @wraps(func)
     def decorated_view(*args, **kwargs):
@@ -173,12 +157,14 @@ def add_balance_by_sid(sid,money):
 
 
 # 根据学号减少账户余额
-def reduce_balance_by_sid(sid,money):
+def reduce_balance_by_sid(sid, money):
     sql = """UPDATE accounts SET balance = balance-"%s"WHERE sid = "%s";""" % (
         money, sid)
     tools.modifyOpt(sql)
 
 
+# 注册用户
+# used in /module/user/register
 def register_account(account):
     sid = account.get('sid', None)
     name = account.get('name', None)
@@ -188,9 +174,11 @@ def register_account(account):
     major = account.get('major', None)
     phone_num = account.get('phone_num', None)
     password = account.get('password', None)
+
+
     # 密码加密逻辑，生成26位字符串，对前端传来的密码进行盐值加密之后存进数据库
     salt = match.random_code(26)
-    password = match.hash_password(password,salt)
+    password = match.hash_password(password, salt)
     msg = ""
     if sid == None or name == None or age == None or grade == None or major == None\
             or phone_num==None or password==None or (not isinstance(age, int)):
@@ -220,7 +208,9 @@ def register_account(account):
     return code, msg
 
 
-def edit_userinfo_model(sid,account):
+# 修改用户资料
+# used in /module/user/userinfo--PUT
+def edit_userinfo_model(sid, account):
     name = account.get('name', None)
     age = account.get('age', None)
     sex = account.get('sex', None)
@@ -243,6 +233,8 @@ def edit_userinfo_model(sid,account):
     return 200, msg
 
 
+# 账户提现
+# used in /user/withdraw
 def user_recharge_model(account):
     phone_num = account.get('phone_num', None)
     money = account.get('money', None)
@@ -265,6 +257,8 @@ def user_recharge_model(account):
     return 200, msg
 
 
+# 创建问卷
+# used in /module/user/create_questionnaire
 def user_withdraw_model(sid, account):
     pay_phone = account.get('pay_phone',None)
     password = account.get('password', None)
@@ -294,6 +288,7 @@ def user_withdraw_model(sid, account):
 
 
 # 创建问卷
+# used in /module/user/create_questionnaire
 def create_questionnaire_model(account):
     sid = account.get('sid', None)
     title = account.get('title', None)
@@ -334,6 +329,7 @@ def create_questionnaire_model(account):
 
 
 # 编辑问卷
+# used in /module/user/edit_questionnaire
 def edit_questionnaire_model(account):
     qid = account.get('qid', None)
     sid = account.get('sid', None)
@@ -380,6 +376,8 @@ def edit_questionnaire_model(account):
     return 200, msg
 
 
+# 将key:value参数转成json形式
+# used in every response
 def python_object_to_json(**kwargs):
     python2json = {}
     for i in kwargs.items():

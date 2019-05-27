@@ -59,11 +59,11 @@ def login():
     else:
         code = 400
         msg = "error_password"
-    current_app.logger.info(dict(session))
+    # current_app.logger.info(dict(session))
     return python_object_to_json(code=code, msg=msg)
 
 
-# 注册函数
+# 注册用户
 @app.route('/module/register', methods=['POST'])
 def register():
     # if not session.get('logged_in'):
@@ -90,7 +90,7 @@ def logout():
 
     code = 200
     msg = "successful"
-    current_app.logger.info(dict(session))
+    # current_app.logger.info(dict(session))
     return python_object_to_json(code=code, msg=msg)
     # flash('You were logged out')
 
@@ -125,7 +125,7 @@ def edit_userinfo():
 #@login_required_mine
 def user_recharge():
     sid = session.get('sid')
-    current_app.logger.info(sid)
+    # current_app.logger.info(sid)
     code, msg = user_recharge_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
