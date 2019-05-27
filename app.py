@@ -194,32 +194,36 @@ def questionnaire_pre():
 """
 
 
-#  答卷提交
+# 答卷提交
 @app.route('/module/user/answer_put_forward', methods=['POST'])
 @login_required_mine
 def answer_put_forward():
-    pass
+    code, msg = answer_put_forward_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 答卷审核
 @app.route('/module/user/answer_review', methods=['PUT'])
 @login_required_mine
 def answer_review():
-    pass
+    code, msg = answer_review_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 获取所有答卷
 @app.route('/module/user/answer_get', methods=['GET'])
 @login_required_mine
 def answer_get():
-    pass
+    code, msg, data = answer_get_model(request.json)
+    return python_object_to_json(code=code, msg=msg, data=data)
 
 
-# 查看一份具体的答卷
+# 查看一份具体问卷
 @app.route('/module/user/get_sid_answer', methods=['GET'])
 @login_required_mine
-def get_sid_answer():
-    pass
+def get_sid_answe():
+    code, msg, data = get_sid_answer_model(request.json)
+    return python_object_to_json(code=code, msg=msg, data=data)
 
 
 if __name__ == '__main__':
