@@ -3,12 +3,12 @@ import time
 import json
 import random
 import logging
+import redis
+import os
 from flask import Flask, redirect, jsonify, render_template, request, session, abort, make_response
 from flask_login import login_required, login_user, logout_user, LoginManager, current_user
 from flask import current_app
 from flask_cors import CORS
-import redis
-import os
 
 from api import *
 
@@ -20,6 +20,7 @@ app.config['SECRET_KEY'] = os.urandom(24)  # 设置随机字符,每次运行服�
 # 项目中设置flask_login
 login_manager = LoginManager()
 login_manager.init_app(app)
+
 
 # 解决跨域问题
 def jsonResponse(dump_json):

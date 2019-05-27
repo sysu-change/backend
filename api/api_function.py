@@ -6,10 +6,10 @@ import io
 import sys
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 from flask import current_app, session
-import json
+
 
 from dbTools import *
-from .match import *
+from .utils import *
 
 # 打开数据库连接
 db = pymysql.connect(host=DB_HOST,
@@ -376,13 +376,4 @@ def edit_questionnaire_model(account):
     msg += "successful"
     return 200, msg
 
-
-# 将key:value参数转成json形式
-# used in every response
-def python_object_to_json(**kwargs):
-    python2json = {}
-    for i in kwargs.items():
-        python2json[i[0]] = i[1]
-    json_str = json.dumps(python2json)
-    return json_str
 
