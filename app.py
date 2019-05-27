@@ -10,7 +10,7 @@ from flask_cors import CORS
 import redis
 import os
 
-from dbTools import *
+from api import *
 
 app = Flask(__name__, instance_relative_config=True)
 # app.config['SECRET_KEY'] = '234rsdf34523rwsf'

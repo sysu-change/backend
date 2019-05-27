@@ -9,9 +9,7 @@ sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 from flask import current_app, session
 import json
 
-
-from .dbConfig import *
-from .dbTools import dbTools as dbTools
+from dbTools import *
 import match
 
 # 打开数据库连接
