@@ -34,6 +34,11 @@ def jsonResponse(dump_json):
     return res
 
 
+"""
+用户信息接口
+"""
+
+
 # 登录函数
 @app.route('/module/login', methods=['POST'])
 def login():
@@ -134,6 +139,10 @@ def user_withdraw():
     return python_object_to_json(code=code, msg=msg)
 
 
+"""
+问卷接口
+"""
+
 # 创建问卷
 @app.route('/module/user/create_questionnaire', methods=['POST'])
 @login_required_mine
@@ -150,24 +159,65 @@ def edit_questionnaire():
     return python_object_to_json(code=code, msg=msg)
 
 
+# 删除问卷
+@app.route('/module/user/delete_questionnaire', methods=['DELETE'])
+@login_required_mine
+def delete_questionnaire():
+    pass
+
+
+# 获取用户创建的所有问卷
+@app.route('/module/user/questionnaire_own', methods=['GET'])
+@login_required_mine
+def questionnaire_own():
+    pass
+
+
+# 请求具体问卷
+@app.route('/module/user/wenjuan/{wenjuan_id}', methods=['GET'])
+@login_required_mine
+def wenjuan():
+    pass
+
+
 # 问卷预览页面数据请求
+# 从当前偏移量开始，获取接下去n个数据库问卷，用户已经填写的不传，未发布的问卷不传
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
 @login_required_mine
 def questionnaire_pre():
     pass
 
 
-# 问卷提交
-@app.route('/module/user/put_forward', methods=['POST'])
+"""
+答卷接口
+"""
+
+
+#  答卷提交
+@app.route('/module/user/answer_put_forward', methods=['POST'])
 @login_required_mine
-def put_forward():
+def answer_put_forward():
     pass
 
 
-# 问卷数据格式
-@app.route('/module/user/questionnaire', methods=['GET'])
+# 答卷审核
+@app.route('/module/user/answer_review', methods=['PUT'])
 @login_required_mine
-def questionnaire():
+def answer_review():
+    pass
+
+
+# 获取所有答卷
+@app.route('/module/user/answer_get', methods=['GET'])
+@login_required_mine
+def answer_get():
+    pass
+
+
+# 查看一份具体的答卷
+@app.route('/module/user/get_sid_answer', methods=['GET'])
+@login_required_mine
+def get_sid_answer():
     pass
 
 
