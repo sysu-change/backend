@@ -6,6 +6,7 @@ from .dbConfig import *
 
 cursorclass = pymysql.cursors.DictCursor
 
+
 class DBPool(object):
     __pool = None
 
@@ -86,7 +87,7 @@ class dbTools:
             the result of modifying db
         """
         # apply connection rescource
-        dbp_opt = dbPool()
+        dbp_opt = DBPool()
         results = dbp_opt.opModify(sql)
         dbp_opt.dispose()  # 释放连接
         return results

@@ -1,5 +1,4 @@
-from .api_function import *
+from dbTools import *
 from .utils import *
 from .account import *
-from .answer import *
 from .questionnaire import *

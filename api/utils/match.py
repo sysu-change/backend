@@ -42,7 +42,7 @@ def random_code(num):
 # 密码盐值加密
 # 暂定的加密逻辑为password = tolower(sha512(password))，这部分由前端负责
 # password = sha512(password+salt)，这部分由后端负责 将加密后的密码存进数据库
-def hash_password(password,salt):
+def hash_password(password, salt):
     if salt == "":
         salt = random_code(26)
     h = hashlib.sha512()
