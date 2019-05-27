@@ -2,7 +2,6 @@ import pymysql
 from DBUtils.PooledDB import PooledDB
 import sys
 sys.path.append('../match/')
-import match
 from functools import wraps
 from .tools import *
 import io
@@ -10,6 +9,8 @@ import sys
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
 from .dbConfig import *
 from flask import current_app, session
+
+import match
 
 # 打开数据库连接
 db = pymysql.connect(host=DB_HOST,

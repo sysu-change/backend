@@ -8,9 +8,9 @@ from flask_login import login_required, login_user, logout_user, LoginManager, c
 from flask import current_app
 from flask_cors import CORS
 import redis
-from dbTools import *
-# 引入OS模块中的产生一个24位的随机字符串的函数
 import os
+
+from dbTools import *
 
 app = Flask(__name__, instance_relative_config=True)
 # app.config['SECRET_KEY'] = '234rsdf34523rwsf'
