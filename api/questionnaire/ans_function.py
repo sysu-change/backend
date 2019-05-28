@@ -17,7 +17,7 @@ def answer_put_forward_model(account):
     qid = account.get('qid', None)
     sid = account.get('sid', None)
     ans_time = account.get('ans_time', None)
-    verify = account.get('verify', None)
+    verify = 0
     content = account.get('content', None)
     msg = ""
     # 判断各种异常情况
@@ -73,11 +73,11 @@ def answer_get_model(account):
     # 解析json得到想要的参数
     qid = account.get('qid', None)
     msg = ""
-    data = []
+    content = []
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
-        return 400, msg, data
+        return 400, msg, content
     sql = "SELECT * FROM answertable WHERE qid ='%d'" % (qid)
     rows = tools.selectOpt(sql)
     if rows:
@@ -86,12 +86,12 @@ def answer_get_model(account):
             temp.sid = rows[i]['sid']
             temp.ans_time = rows[i]['ans_time']
             temp.verify = rows[i]['verify']
-            data.append(temp)
+            content.append(temp)
         msg += "successful"
-        return 200, msg, data
+        return 200, msg, content
     else:
         msg += "failed"
-        return 400, msg, data
+        return 400, msg, content
 
 
 # 定义答卷类对象在获取所有答卷api时返回该对象的数组
@@ -109,22 +109,22 @@ def get_sid_answer_model(account):
     qid = account.get('qid', None)
     sid = account.get('sid', None)
     msg = ""
-    data = {}
+    content = {}
 
     # 当前sid与登录sid不符
     if not session['sid'] == sid:
         msg += "refused because of publisher_must_be_your_own"
-        return 400, msg, data
+        return 400, msg, content
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
-        return 400, msg, data
+        return 400, msg, content
     sql = "SELECT * FROM answertable WHERE qid ='%d' AND sid ='%s" % (qid, sid)
     rows = tools.selectOpt(sql)
     if rows:
-        data = rows[0]
+        content = rows[0]
         msg += "successful"
-        return 200, msg, data
+        return 200, msg, content
     else:
         msg += "failed"
-        return 400, msg, data
+        return 400, msg, content

@@ -13,7 +13,7 @@ from .utils import *
 # 创建问卷
 # used in /module/user/create_questionnaire
 def create_questionnaire_model(account):
-    sid = account.get('sid', None)
+    sid = session.get('sid')
     title = account.get('title', None)
     description = account.get('description', None)
     edit_status = account.get('edit_status', None)
@@ -27,14 +27,11 @@ def create_questionnaire_model(account):
             content is None or (not isinstance(edit_status, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    if not session['sid'] == sid:
-        msg += "publisher_must_be_your_own"
-        return 400, msg
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
         return 400, msg
     if not isinstance(reward, float):
-        msg += "quantity_must_be_float"
+        msg += "reward_must_be_float"
         return 400, msg
     if edit_status == 1:
         cost = reward * quantity
@@ -57,7 +54,7 @@ def create_questionnaire_model(account):
 # used in /module/user/edit_questionnaire
 def edit_questionnaire_model(account):
     qid = account.get('qid', None)
-    sid = account.get('sid', None)
+    sid = session.get('sid')
     title = account.get('title', None)
     description = account.get('description', None)
     edit_status = account.get('edit_status', None)
@@ -69,9 +66,6 @@ def edit_questionnaire_model(account):
     if sid == None or title == None or description== None or edit_status == None or pub_time==None\
         or reward == None or quantity == None or content== None or (not isinstance(edit_status, int)):
         msg += "Illegal_parameter"
-        return 400, msg
-    if not session['sid'] == sid:
-        msg += "publisher_must_be_your_own"
         return 400, msg
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
@@ -129,72 +123,62 @@ def delete_questionnaire_model(account):
     return 200, msg
 
 
-# 定义答卷类对象在获取所有答卷api时返回该对象的数组
-class question_obj():
-    def __init__(self):
-        self.qid = 0
-        self.title = ""
-        self.description = ""
-        self.status = 0
-        self.quantity = 0
-        self.reward = 0.0
-
-
 # 获取用户创建的所有问卷
 # used in /module/user/questionnaire_own
 def questionnaire_own_model(account):
     sid = session.get('sid')
     msg = ""
-    data = []
+    content = []
     # 对应参数为空的情况
     if sid is None:
         msg += "refused because of Illegal_parameter"
-        return 400, msg
-    sql = "SELECT * FROM questiontable WHERE sid ='%d'" % (sid)
+        return 400, msg, 0, content
+    sql = "SELECT * FROM questiontable WHERE sid ='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
-            temp = question_obj()
-            temp.qid = rows[i]['qid']
-            temp.title = rows[i]['title']
-            temp.description = rows[i]['description']
-            temp.status = rows[i]['status']
-            temp.quantity = rows[i]['quantity']
-            temp.reward = rows[i]['reward']
-            data.append(temp)
+            temp = {}
+            temp['qid'] = rows[i]['qid']
+            temp['title'] = rows[i]['title']
+            temp['description'] = rows[i]['description']
+            temp['edit_status'] = rows[i]['edit_status']
+            temp['quantity'] = rows[i]['quantity']
+            temp['reward'] = rows[i]['reward']
+            content.append(temp)
         msg += "successful"
         number = len(rows)
-        return 200, msg, number, data
+        return 200, msg, number, content
     else:
         msg += "failed"
         number = 0
-        return 400, msg, number, data
+        return 400, msg, number, content
 
 
 # 请求具体问卷
-# used in /module/user/wenjuan/{wenjuan_id}
-def questionnaire_spec_model(account):
-    qid = account.get('qid', None)
+# used in /module/user/questionnaire/{qid}
+def questionnaire_spec_model(qid):
+    qid = qid
     msg = ""
     # 对应参数为空的情况
     if qid == None:
         msg += "refused because of Illegal_parameter"
-        return 400, msg
+        return 400, msg, []
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
-        return 400, msg
+        return 400, msg, []
 
     sql = "SELECT * FROM questiontable WHERE qid ='%d'" % (qid)
     rows = tools.selectOpt(sql)
     if rows:
-        data = rows[0]
+        content = rows[0]
+        content['content'] = eval(content['content'])
         msg += "successful"
-        return 200, msg, data
+        return 200, msg, content
     else:
         msg += "failed"
-        data = None
-        return 400, msg, data
+        content = None
+        return 400, msg, content
 
 
 # 问卷预览页面数据请求
@@ -203,25 +187,25 @@ def questionnaire_spec_model(account):
 def questionnaire_pre_model(account):
     offset = account.get('offset', None)
     number = account.get('number', None)
-    data = []
+    content = []
     msg = ""
-    sql = "SELECT * FROM questiontable"
+    sql = "SELECT * FROM questiontable where edit_status = 1"
     rows = tools.selectOpt(sql)
 
     if rows:
         for i in range(offset, min(len(rows), offset+number)):
-            temp = question_obj()
-            temp.qid = rows[i]['qid']
-            temp.title = rows[i]['title']
-            temp.description = rows[i]['description']
-            temp.status = rows[i]['status']
-            temp.quantity = rows[i]['quantity']
-            temp.reward = rows[i]['reward']
-            data.append(temp)
+            temp = {}
+            temp['qid'] = rows[i]['qid']
+            temp['title'] = rows[i]['title']
+            temp['description'] = rows[i]['description']
+            temp['edit_status'] = rows[i]['edit_status']
+            temp['quantity'] = rows[i]['quantity']
+            temp['reward'] = rows[i]['reward']
+            content.append(temp)
         msg += "successful"
-        number = len(data)
-        return 200, msg, number, data
+        number = len(content)
+        return 200, msg, number, content
     else:
         msg += "failed"
         number = 0
-        return 400, msg, number, data
+        return 400, msg, number, content

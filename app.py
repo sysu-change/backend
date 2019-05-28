@@ -120,6 +120,7 @@ def user_withdraw():
 问卷接口
 """
 
+
 # 创建问卷
 @app.route('/module/user/create_questionnaire', methods=['POST'])
 @login_required_mine
@@ -148,16 +149,17 @@ def delete_questionnaire():
 @app.route('/module/user/questionnaire_own', methods=['GET'])
 @login_required_mine
 def questionnaire_own():
-    code, msg = questionnaire_own_model(request.json)
-    return python_object_to_json(code=code, msg=msg)
+    code, msg, number, content = questionnaire_own_model(request.json)
+    # current_app.logger.info(content)
+    return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
 # 请求具体问卷
-@app.route('/module/user/wenjuan/{wenjuan_id}', methods=['GET'])
+@app.route('/module/user/questionnaire/<int:qid>', methods=['GET'])
 @login_required_mine
-def questionnaire_spec():
-    code, msg = questionnaire_spec_model(request.json)
-    return python_object_to_json(code=code, msg=msg)
+def questionnaire_spec(qid):
+    code, msg, content = questionnaire_spec_model(qid)
+    return python_object_to_json(code=code, msg=msg, content=content)
 
 
 # 问卷预览页面数据请求
@@ -165,8 +167,8 @@ def questionnaire_spec():
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
 @login_required_mine
 def questionnaire_pre():
-    code, msg = questionnaire_pre_model(request.json)
-    return python_object_to_json(code=code, msg=msg)
+    code, msg, number, content = questionnaire_pre_model(request.json)
+    return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
 """
@@ -194,16 +196,16 @@ def answer_review():
 @app.route('/module/user/answer_get', methods=['GET'])
 @login_required_mine
 def answer_get():
-    code, msg, data = answer_get_model(request.json)
-    return python_object_to_json(code=code, msg=msg, data=data)
+    code, msg, content = answer_get_model(request.json)
+    return python_object_to_json(code=code, msg=msg, content=content)
 
 
 # 查看一份具体答卷
 @app.route('/module/user/get_sid_answer', methods=['GET'])
 @login_required_mine
 def get_sid_answer():
-    code, msg, data = get_sid_answer_model(request.json)
-    return python_object_to_json(code=code, msg=msg, data=data)
+    code, msg, content = get_sid_answer_model(request.json)
+    return python_object_to_json(code=code, msg=msg, content=content)
 
 
 if __name__ == '__main__':

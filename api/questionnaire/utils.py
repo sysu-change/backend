@@ -40,7 +40,8 @@ def get_no_verify_num_by_qid(qid):
     # current_app.logger.info('select_user_by_sid')
     sql = "SELECT count(*) FROM answertable WHERE qid ='%s' AND verify = 0" % (qid)
     rows = tools.selectOpt(sql)
-    return int(rows[0])
+    current_app.logger.info(rows[0])
+    return rows[0]['count(*)']
 
 
 # 根据学号增加账户余额
