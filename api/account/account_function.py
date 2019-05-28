@@ -12,9 +12,10 @@ from .utils import *
 
 # 登录函数
 # used in /module/login
-def login_auth(phone_num, password):
-    # current_app.logger.info('login_auth')
-    current_app.logger.info(dict(session))
+def login_auth(account):
+    phone_num = account.get('phone_num', None)
+    password = account.get('password', None)
+
     salt = select_salt_by_phone_num(phone_num)
 
     if salt == "":
@@ -36,7 +37,16 @@ def login_auth(phone_num, password):
         session['major'] = rows_['major']
         session['phone_num'] = rows_['phone_num']
         session['balance'] = rows_['balance']
-    return isAuth
+    if isAuth:
+        code = 200
+        msg = "successful"
+    elif phone_num == None or password == None:
+        code = 400
+        msg = "Illegal_parameter"
+    else:
+        code = 400
+        msg = "error_password"
+    return code, msg
 
 
 # 注册用户
@@ -86,7 +96,8 @@ def register_account(account):
 
 # 修改用户资料
 # used in /module/user/userinfo--PUT
-def edit_userinfo_model(sid, account):
+def edit_userinfo_model(account):
+    sid = session.get('sid')
     name = account.get('name', None)
     age = account.get('age', None)
     sex = account.get('sex', None)
@@ -115,7 +126,7 @@ def user_recharge_model(account):
     phone_num = account.get('phone_num', None)
     money = account.get('money', None)
     msg = ""
-    if phone_num == None or money == None or (not isinstance(money, int)):
+    if phone_num is None or money is None or (not isinstance(money, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not match_phone(phone_num):
@@ -124,7 +135,7 @@ def user_recharge_model(account):
     if not select_user_by_phone_num(phone_num):
         msg += "not_registered_phone_num"
         return 400, msg
-    sql = """UPDATE accounts SET balance = balance+"%s"WHERE phone_num= "%s";""" % (
+    sql = """UPDATE accounts SET balance = balance+"%s" WHERE phone_num= "%s";""" % (
         money, phone_num)
     tools.modifyOpt(sql)
     msg += "successful"
@@ -135,7 +146,8 @@ def user_recharge_model(account):
 
 # 账户提现
 # used in /user/withdraw
-def user_withdraw_model(sid, account):
+def user_withdraw_model(account):
+    sid = session.get('sid')
     pay_phone = account.get('pay_phone', None)
     password = account.get('password', None)
     money = account.get('money', None)

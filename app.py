@@ -40,42 +40,21 @@ def jsonResponse(dump_json):
 """
 
 
-# 登录函数
+# 用户登录
 @app.route('/module/login', methods=['POST'])
 def login():
-    # current_app.logger.info('123')
-    # current_app.logger.info(request.json)
-
-    user = request.json
-    phone_num = user.get('phone_num', None)
-    password = user.get('password', None)
-
-    isAuth = login_auth(phone_num, password)
-    if isAuth:
-        code = 200
-        msg = "successful"
-    elif phone_num == None or password == None:
-        code = 400
-        msg = "Illegal_parameter"
-    else:
-        code = 400
-        msg = "error_password"
-    # current_app.logger.info(dict(session))
+    code, msg = login_auth(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
-# 注册用户
+# 用户注册
 @app.route('/module/register', methods=['POST'])
 def register():
-    # if not session.get('logged_in'):
-    #     abort(401)
-
     code, msg = register_account(request.json)
     return python_object_to_json(code=code, msg=msg)
-    # return "register successfully"
 
 
-# 注销登录函数
+# 注销登录
 @app.route('/module/logout', methods=['DELETE'])
 @login_required_mine
 def logout():
@@ -91,9 +70,7 @@ def logout():
 
     code = 200
     msg = "successful"
-    # current_app.logger.info(dict(session))
     return python_object_to_json(code=code, msg=msg)
-    # flash('You were logged out')
 
 
 # 获取用户资料
@@ -108,6 +85,7 @@ def userinfo():
     sex = session.get('sex')
     phone_num = session.get('phone_num')
     balance = session.get('balance')
+
     return python_object_to_json(name=name, sid=sid, age=age, major=major, grade=grade,
                                  sex=sex, phone_num=phone_num, balance=balance)
 
@@ -116,8 +94,7 @@ def userinfo():
 @app.route('/module/user/userinfo', methods=['PUT'])
 @login_required_mine
 def edit_userinfo():
-    sid = session.get('sid')
-    code, msg = edit_userinfo_model(sid, request.json)
+    code, msg = edit_userinfo_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -125,7 +102,7 @@ def edit_userinfo():
 @app.route('/user/recharge', methods=['POST'])
 #@login_required_mine
 def user_recharge():
-    sid = session.get('sid')
+    # sid = session.get('sid')
     # current_app.logger.info(sid)
     code, msg = user_recharge_model(request.json)
     return python_object_to_json(code=code, msg=msg)
@@ -135,8 +112,7 @@ def user_recharge():
 @app.route('/user/withdraw', methods=['POST'])
 @login_required_mine
 def user_withdraw():
-    sid = session.get('sid')
-    code, msg = user_withdraw_model(sid, request.json)
+    code, msg = user_withdraw_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -164,21 +140,24 @@ def edit_questionnaire():
 @app.route('/module/user/delete_questionnaire', methods=['DELETE'])
 @login_required_mine
 def delete_questionnaire():
-    pass
+    code, msg = delete_questionnaire_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 获取用户创建的所有问卷
 @app.route('/module/user/questionnaire_own', methods=['GET'])
 @login_required_mine
 def questionnaire_own():
-    pass
+    code, msg = questionnaire_own_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 请求具体问卷
 @app.route('/module/user/wenjuan/{wenjuan_id}', methods=['GET'])
 @login_required_mine
-def wenjuan():
-    pass
+def questionnaire_spec():
+    code, msg = questionnaire_spec_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 问卷预览页面数据请求
@@ -186,7 +165,8 @@ def wenjuan():
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
 @login_required_mine
 def questionnaire_pre():
-    pass
+    code, msg = questionnaire_pre_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 """
@@ -218,10 +198,10 @@ def answer_get():
     return python_object_to_json(code=code, msg=msg, data=data)
 
 
-# 查看一份具体问卷
+# 查看一份具体答卷
 @app.route('/module/user/get_sid_answer', methods=['GET'])
 @login_required_mine
-def get_sid_answe():
+def get_sid_answer():
     code, msg, data = get_sid_answer_model(request.json)
     return python_object_to_json(code=code, msg=msg, data=data)
 

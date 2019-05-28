@@ -11,6 +11,7 @@ from .utils import *
 
 
 # 答卷提交
+# used in /module/user/answer_put_forward
 def answer_put_forward_model(account):
     # 解析json得到想要的参数
     qid = account.get('qid', None)
@@ -21,7 +22,7 @@ def answer_put_forward_model(account):
     msg = ""
     # 判断各种异常情况
     # 对应参数为空的情况
-    if sid == None or sid == None or ans_time == None or verify == None or content == None:
+    if sid is None or sid is None or ans_time is None or verify is None or content is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg
     # 当前sid与登录sid不符
@@ -42,6 +43,7 @@ def answer_put_forward_model(account):
 
 
 # 答卷审核
+# used in /module/user/answer_review
 def answer_review_model(account):
     # 解析json得到想要的参数
     qid = account.get('qid', None)
@@ -58,20 +60,21 @@ def answer_review_model(account):
         msg += "refused because of maybe_error_qid"
         return 400, msg
     # 审核成功更新数据库
-    sql = """UPDATE answertable SET verify ="%d" WHERE qid= "%d" AND sid= "%s";""" % (
-         qid, sid)
+    sql = """UPDATE answertable SET verify ="%d" WHERE qid= "%d" AND sid= "%s";""" % \
+          (qid, sid)
     tools.modifyOpt(sql)
     msg += "successful"
     return 200, msg
 
 
 # 获取所有答卷
+# used in /module/user/answer_get
 def answer_get_model(account):
     # 解析json得到想要的参数
     qid = account.get('qid', None)
-    # 数据库中查不到对应的问卷id, 即问卷不存在
     msg = ""
     data = []
+    # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
         return 400, msg, data
@@ -100,6 +103,7 @@ class Answer_obj():
 
 
 # 查看具体一份问卷
+# used in /module/user/get_sid_answer
 def get_sid_answer_model(account):
     # 解析json得到想要的参数
     qid = account.get('qid', None)
@@ -118,7 +122,7 @@ def get_sid_answer_model(account):
     sql = "SELECT * FROM answertable WHERE qid ='%d' AND sid ='%s" % (qid, sid)
     rows = tools.selectOpt(sql)
     if rows:
-        data_ = rows[0]
+        data = rows[0]
         msg += "successful"
         return 200, msg, data
     else:
