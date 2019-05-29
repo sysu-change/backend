@@ -98,6 +98,12 @@ def edit_questionnaire_model(account):
 # 删除问卷
 # used in /module/user/delete_questionnaire
 def delete_questionnaire_model(account):
+
+    # ***
+    # todo：问卷发布时扣除钱了，删除问卷里面还有钱得返还到当前账户
+    # todo：记得同步更新session的账户余额 ，不能只更新数据库
+    # ***
+
     qid = account.get('qid', None)
     msg = ""
     # 对应参数为空的情况

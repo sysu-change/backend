@@ -25,10 +25,25 @@ def answer_put_forward_model(account):
     if sid is None or sid is None or ans_time is None or verify is None or content is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg
+
+    # ***
+    # todo：修改这一步的报错信息，传来的sid是答卷人，不需要判断发布者是答卷人
+    # ****
+
     # 当前sid与登录sid不符
-    if not session['sid'] == sid:
-        msg += "refused because of publisher_must_be_your_own"
-        return 400, msg
+    #if not session['sid'] == sid:
+    #    msg += "refused because of publisher_must_be_your_own"
+    #    return 400, msg
+
+    # ***
+    # todo：判断是否答过题，重复提交答卷会让数据库崩掉，导致后端崩掉，屏蔽这种情况
+    # ****
+
+    # ***
+    # todo：未发布的问卷不允许提交答卷，虽然前端应该不会这么做，
+    # todo：但是如果发来了，后端得做屏蔽处理，不然数据库会乱
+    # ****
+
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
@@ -45,6 +60,11 @@ def answer_put_forward_model(account):
 # 答卷审核
 # used in /module/user/answer_review
 def answer_review_model(account):
+
+    # ***
+    # todo：正常输入。但是程序会崩溃，修复逻辑bug
+    # ***
+
     # 解析json得到想要的参数
     qid = account.get('qid', None)
     sid = account.get('sid', None)
@@ -60,6 +80,12 @@ def answer_review_model(account):
         msg += "refused because of maybe_error_qid"
         return 400, msg
     # 审核成功更新数据库
+
+    # ***
+    # %d 是传入数据一类，不需要加双引号的，加了双引号变成了str，数据库会崩
+    # 应该传入三个参数，括号只给了两个参数，对应不上
+    # ***
+
     sql = """UPDATE answertable SET verify ="%d" WHERE qid= "%d" AND sid= "%s";""" % \
           (qid, sid)
     tools.modifyOpt(sql)
@@ -70,6 +96,11 @@ def answer_review_model(account):
 # 获取所有答卷
 # used in /module/user/answer_get
 def answer_get_model(account):
+
+    # ***
+    # todo：正常输入。但是程序会崩溃，修复逻辑bug
+    # ***
+
     # 解析json得到想要的参数
     qid = account.get('qid', None)
     msg = ""
@@ -105,16 +136,25 @@ class Answer_obj():
 # 查看具体一份问卷
 # used in /module/user/get_sid_answer
 def get_sid_answer_model(account):
+
+    # ***
+    # todo：正常输入。但是程序会崩溃，修复逻辑bug
+    # ***
+
     # 解析json得到想要的参数
     qid = account.get('qid', None)
     sid = account.get('sid', None)
     msg = ""
     content = {}
 
+    # ***
+    # todo：奶牛端登陆，可以查看任意答题人的问卷，此时这两个sid是不相等的
+    # ****
+
     # 当前sid与登录sid不符
-    if not session['sid'] == sid:
-        msg += "refused because of publisher_must_be_your_own"
-        return 400, msg, content
+    #if not session['sid'] == sid:
+    #    msg += "refused because of publisher_must_be_your_own"
+    #    return 400, msg, content
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
