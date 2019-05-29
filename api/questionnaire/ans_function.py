@@ -100,7 +100,7 @@ def answer_get_model(account):
     # 数据库中查不到对应的问卷id, 即问卷不存在
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
-        return 400, msg, content
+        return 400, msg, 0, content
     sql = "SELECT * FROM answertable WHERE qid =%d" % (qid)
     rows = tools.selectOpt(sql)
     if rows:
@@ -115,7 +115,8 @@ def answer_get_model(account):
         return 200, msg, number, content
     else:
         msg += "failed"
-        return 400, msg, 0, content
+        number = 0
+        return 400, msg, number, content
 
 
 # 查看具体一份问卷
