@@ -98,12 +98,6 @@ def edit_questionnaire_model(account):
 # 删除问卷
 # used in /module/user/delete_questionnaire
 def delete_questionnaire_model(account):
-
-    # ***
-    # todo：问卷发布时扣除钱了，删除问卷里面还有钱得返还到当前账户
-    # todo：记得同步更新session的账户余额 ，不能只更新数据库
-    # ***
-
     qid = account.get('qid', None)
     msg = ""
     # 对应参数为空的情况
@@ -122,9 +116,19 @@ def delete_questionnaire_model(account):
     if get_no_verify_num_by_qid(qid) != 0:
         msg += "refused because there are still some answers no verify"
         return 400, msg
+
+    # 返还剩下的钱
+    verify_num = get_verify_num_by_qid(qid)
+    quantity = get_quantity_by_qid(qid)
+    reward = get_reward_by_qid(qid)
+    return_monty = (quantity - verify_num) * reward
+    add_balance_by_sid(session['sid'], return_monty)
+    session['balance'] = session['balance'] + return_monty
+    # 删除问卷
     sql = """DELETE FROM questiontable WHERE qid= "%d";""" % \
           (qid)
     tools.modifyOpt(sql)
+
     msg += "successful"
     return 200, msg
 
