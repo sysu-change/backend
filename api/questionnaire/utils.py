@@ -12,6 +12,17 @@ def select_questionnaire_by_qid(qid):
         return False
 
 
+# 通过sid和qid查找是否含有该答卷
+def select_answer_by_sid_and_qid(qid, sid):
+    # current_app.logger.info('select_user_by_sid')
+    sql = "SELECT * FROM answertable WHERE qid ='%s' AND sid = '%s'" % (qid, sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return True
+    else:
+        return False
+
+
 # 根据问卷id获取问卷状态
 def select_questionnaire_status_by_qid(qid):
     # current_app.logger.info('select_user_by_sid')
@@ -75,7 +86,14 @@ def get_verify_num_by_qid(qid):
     return rows[0]['count(*)']
 
 
-
+# 根据qid和sid判断答卷审核状态
+def get_verify_state_by_id(qid, sid):
+    sql = "SELECT * FROM answertable WHERE qid = %d AND sid = '%s'" % (qid, sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return rows[0]['verify']
+    else:
+        return 0
 
 
 # 根据学号增加账户余额
