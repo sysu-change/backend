@@ -115,7 +115,7 @@ def answer_get_model(account):
         return 200, msg, number, content
     else:
         msg += "failed"
-        return 400, msg, content
+        return 400, msg, 0, content
 
 
 # 查看具体一份问卷
