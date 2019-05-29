@@ -111,7 +111,8 @@ def answer_get_model(account):
             temp['verify'] = rows[i]['verify']
             content.append(temp)
         msg += "successful"
-        return 200, msg, content
+        number = len(rows)
+        return 200, msg, number, content
     else:
         msg += "failed"
         return 400, msg, content

@@ -196,8 +196,8 @@ def answer_review():
 @app.route('/module/user/answer_get', methods=['GET'])
 @login_required_mine
 def answer_get():
-    code, msg, content = answer_get_model(request.json)
-    return python_object_to_json(code=code, msg=msg, content=content)
+    code, msg, number, content = answer_get_model(request.json)
+    return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
 # 查看一份具体答卷
