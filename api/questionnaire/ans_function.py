@@ -134,6 +134,7 @@ def get_sid_answer_model(account):
     rows = tools.selectOpt(sql)
     if rows:
         content = rows[0]
+        content['content'] = eval(content['content'])
         msg += "successful"
         return 200, msg, content
     else:
