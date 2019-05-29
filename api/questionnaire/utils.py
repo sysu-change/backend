@@ -34,6 +34,7 @@ def select_questionnaire_status_by_qid(qid):
     else:
         return 9999
 
+
 # 查找qid对应的创建者
 def get_sid_by_qid(qid):
     # current_app.logger.info('select_user_by_sid')

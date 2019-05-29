@@ -109,21 +109,22 @@ def delete_questionnaire_model(account):
         msg += "refused because of maybe_error_qid"
         return 400, msg
     # 查看该用户是否是该问卷创始人
-    if not get_sid_by_qid(qid):
+    if not session['sid'] == get_sid_by_qid(qid):
         msg += "refused because no authority"
         return 400, msg
     # 查看是否还存在答卷未审核
     if get_no_verify_num_by_qid(qid) != 0:
         msg += "refused because there are still some answers no verify"
         return 400, msg
-
-    # 返还剩下的钱
-    verify_num = get_verify_num_by_qid(qid)
-    quantity = get_quantity_by_qid(qid)
-    reward = get_reward_by_qid(qid)
-    return_monty = (quantity - verify_num) * reward
-    add_balance_by_sid(session['sid'], return_monty)
-    session['balance'] = session['balance'] + return_monty
+    # 判断是否需要退钱
+    if select_questionnaire_status_by_qid(qid) == 1:
+        # 返还剩下的钱
+        verify_num = get_verify_num_by_qid(qid)
+        quantity = get_quantity_by_qid(qid)
+        reward = get_reward_by_qid(qid)
+        return_monty = (quantity - verify_num) * reward
+        add_balance_by_sid(session['sid'], return_monty)
+        session['balance'] = session['balance'] + return_monty
     # 删除问卷
     sql = """DELETE FROM questiontable WHERE qid= "%d";""" % \
           (qid)
