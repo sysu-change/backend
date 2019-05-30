@@ -1,6 +1,6 @@
 import json
 from functools import wraps
-from flask import current_app, session
+from flask import current_app, session, request
 from api import *
 
 

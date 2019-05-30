@@ -17,10 +17,6 @@ app = Flask(__name__, instance_relative_config=True)
 app.config['SECRET_KEY'] = os.urandom(24)  # 设置随机字符,每次运行服务器都是不同的，所以服务器启动一次上次的session就清除
 # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 设置session的保存时间
 
-# 项目中设置flask_login
-login_manager = LoginManager()
-login_manager.init_app(app)
-
 
 # 解决跨域问题
 def jsonResponse(dump_json):
@@ -77,6 +73,7 @@ def logout():
 @app.route('/module/user/userinfo', methods=['GET'])
 @login_required_mine
 def userinfo():
+    # current_app.logger.info(dict(session))
     name = session.get('name')
     sid = session.get('sid')
     age = session.get('age')
@@ -100,10 +97,9 @@ def edit_userinfo():
 
 # 账户充值
 @app.route('/user/recharge', methods=['POST'])
-#@login_required_mine
+@login_required_mine
 def user_recharge():
     # sid = session.get('sid')
-    # current_app.logger.info(sid)
     code, msg = user_recharge_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
@@ -167,7 +163,7 @@ def questionnaire_spec(qid):
 @app.route('/module/user/questionnaire_pre', methods=['GET'])
 @login_required_mine
 def questionnaire_pre():
-    code, msg, number, content = questionnaire_pre_model(request.json)
+    code, msg, number, content = questionnaire_pre_model(request)
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 

@@ -195,14 +195,23 @@ def questionnaire_spec_model(qid):
 # 问卷预览页面数据请求
 # 从当前偏移量开始，获取接下去n个数据库问卷，用户已经填写的不传，未发布的问卷不传
 # used in /module/user/questionnaire_pre
-def questionnaire_pre_model(account):
-    offset = account.get('offset', None)
-    number = account.get('number', None)
+def questionnaire_pre_model(request):
+    offset = request.args.get("offset")
+    number = request.args.get("number")
+
     content = []
     msg = ""
+
+    if offset is None or number is None or not (offset.isdigit() and number.isdigit()):
+        msg += "invalid parameter"
+        number = 0
+        return 400, msg, number, content
+
+    offset = int(offset)
+    number = int(number)
+
     sql = "SELECT * FROM questiontable where edit_status = 1"
     rows = tools.selectOpt(sql)
-
     if rows:
         for i in range(offset, min(len(rows), offset+number)):
             temp = {}

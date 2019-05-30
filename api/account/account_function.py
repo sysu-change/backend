@@ -19,11 +19,13 @@ def login_auth(account):
     salt = select_salt_by_phone_num(phone_num)
 
     if salt == "":
-        return False
+        code = 400
+        msg = "fail"
+        return code, msg
     password = hash_password(password, salt)
     isAuth = False
-    sql = "SELECT * FROM accounts WHERE phone_num ='%s' AND password = '%s'" % (
-    phone_num, password)
+    sql = "SELECT * FROM accounts WHERE phone_num ='%s' AND password = '%s'" % \
+          (phone_num, password)
     rows = tools.selectOpt(sql)
     # current_app.logger.info('查询结果>>>', rows)
     if rows:
