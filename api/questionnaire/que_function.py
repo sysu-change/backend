@@ -160,9 +160,9 @@ def questionnaire_own_model(account):
         number = len(rows)
         return 200, msg, number, content
     else:
-        msg += "failed"
+        msg += "successful"
         number = 0
-        return 400, msg, number, content
+        return 200, msg, 0, content
 
 
 # 请求具体问卷
