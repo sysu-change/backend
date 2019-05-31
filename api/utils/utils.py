@@ -40,7 +40,7 @@ def sent_email_answer_message(to, qid, verify):
     # # 3> 指定发件人和收件人。
     from_email = '1542193293@qq.com'
     # # 4> 邮件标题
-    subject = '闲钱宝 任务审核信息'
+    subject = '闲钱宝 问卷审核信息'
     # # 5> 邮件内容
     content = ''
     # # 创建邮件发送对象
@@ -57,7 +57,7 @@ def sent_email_answer_message(to, qid, verify):
     if not res:
         return False
     if verify == 1:
-        content = '恭喜您，您在闲钱宝关于问卷编号为'+ str(qid) + '的回答已经透过审核，问卷赏金已经存进您的账户'
+        content = '恭喜您，您在闲钱宝关于问卷编号为'+ str(qid) + '的回答已经通过审核，问卷赏金已经存进您的账户'
     if verify == 0:
         content = '非常遗憾，您在闲钱宝关于问卷编号为' + str(qid) + '的回答未能通过审核，请注意规范答题！'
     msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content ])
@@ -79,7 +79,7 @@ def sent_email_to_task_publisher(to, qid, content_num):
     # # 3> 指定发件人和收件人。
     from_email = '1542193293@qq.com'
     # # 4> 邮件标题
-    subject = '闲钱宝 任务审核信息'
+    subject = '闲钱宝 任务信息提醒'
     # # 5> 邮件内容
     content = ''
     # # 创建邮件发送对象
@@ -126,7 +126,7 @@ def sent_email_to_task_receiver(to, qid, content_num):
     # # 3> 指定发件人和收件人。
     from_email = '1542193293@qq.com'
     # # 4> 邮件标题
-    subject = '闲钱宝 任务审核信息'
+    subject = '闲钱宝 任务信息提醒'
     # # 5> 邮件内容
     content = ''
     # # 创建邮件发送对象
