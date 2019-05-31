@@ -187,9 +187,9 @@ def questionnaire_spec_model(qid):
         msg += "successful"
         return 200, msg, content
     else:
-        msg += "failed"
+        msg += "no record"
         content = None
-        return 400, msg, content
+        return 200, msg, content
 
 
 # 问卷预览页面数据请求
@@ -226,6 +226,6 @@ def questionnaire_pre_model(request):
         number = len(content)
         return 200, msg, number, content
     else:
-        msg += "failed"
+        msg += "no record"
         number = 0
-        return 400, msg, number, content
+        return 200, msg, 0, content
