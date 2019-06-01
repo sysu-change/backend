@@ -46,7 +46,8 @@ def sent_email_answer_message(to, qid, verify):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL()
+    stmp_obj = smtplib.SMTP_SSL(host=host)
+    # stmp_obj = smtplib.SMTP_SSL()
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
@@ -85,7 +86,7 @@ def sent_email_to_task_publisher(to, qid, content_num):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL()
+    stmp_obj = smtplib.SMTP_SSL(host=host)
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
@@ -132,7 +133,7 @@ def sent_email_to_task_receiver(to, qid, content_num):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL()
+    stmp_obj = smtplib.SMTP_SSL(host=host)
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
