@@ -63,6 +63,7 @@ def answer_review_model(account):
     qid = account.get('qid', None)
     sid = account.get('sid', None)
     verify = account.get('verify', None)
+    email = select_email_by_sid(sid)
     msg = ""
     # 判断各种异常情况
     # 对应参数为空的情况
@@ -81,7 +82,8 @@ def answer_review_model(account):
     sql = """UPDATE answertable SET verify =%d WHERE qid= %d AND sid = "%s";""" % (
         verify, qid, sid)
     tools.modifyOpt(sql)
-
+    current_app.logger.info(email)
+    sent_email_answer_message(email, qid, verify)
     # 现审核成功支付费用
     money = get_reward_by_qid(qid)
     if verify == 1:

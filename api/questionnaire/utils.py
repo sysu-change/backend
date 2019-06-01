@@ -116,3 +116,15 @@ def add_balance_by_sid(sid, money):
     sql = """UPDATE accounts SET balance = balance+"%s"WHERE sid = "%s";""" % (
         money, sid)
     tools.modifyOpt(sql)
+
+
+# 根据sid查找对应的邮箱email
+def select_email_by_sid(sid):
+    # current_app.logger.info('select_user_by_sid')
+    sql = "SELECT * FROM accounts WHERE sid ='%s'" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        return rows_['email']
+    else:
+        return "can't find correspond email!"

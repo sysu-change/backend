@@ -38,6 +38,8 @@ def login_auth(account):
         session['grade'] = grade_trans(rows_['grade'])
         session['major'] = rows_['major']
         session['phone_num'] = rows_['phone_num']
+        session['email'] = rows_['email']
+        session['Credibility'] = rows_['Credibility']
         session['balance'] = rows_['balance']
     if isAuth:
         code = 200
@@ -61,6 +63,8 @@ def register_account(account):
     grade = account.get('grade', None)
     major = account.get('major', None)
     phone_num = account.get('phone_num', None)
+    email = account.get('email', None)
+    Credibility = 100
     password = account.get('password', None)
 
 
@@ -69,7 +73,7 @@ def register_account(account):
     password = hash_password(password, salt)
     msg = ""
     if sid == None or name == None or age == None or grade == None or major == None\
-            or phone_num==None or password==None or (not isinstance(age, int)):
+            or phone_num==None or email==None or password==None or (not isinstance(age, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not match_sid(sid):
@@ -85,9 +89,9 @@ def register_account(account):
         msg += "already_exists_sid"
         return 400, msg
     if msg == "":
-        sql = """INSERT INTO accounts(sid, name, age, sex, grade, major, phone_num, password, balance,salt)
-                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s", "%s", "0","%s");""" % (
-            sid, name, age, sex, grade, major, phone_num, password, salt)
+        sql = """INSERT INTO accounts(sid, name, age, sex, grade, major, phone_num, email, Credibility, password, balance,salt)
+                                            VALUES ("%s", "%s", %d, "%s", "%s", "%s", "%s","%s",%d, "%s", "0","%s");""" % (
+            sid, name, age, sex, grade, major, phone_num, email, Credibility, password, salt)
         tools.modifyOpt(sql)
         msg += "successful"
         code = 200
@@ -105,13 +109,14 @@ def edit_userinfo_model(account):
     sex = account.get('sex', None)
     grade = account.get('grade', None)
     major = account.get('major', None)
+    email = account.get('email', None)
     msg = ""
-    if  name == None or age == None or grade == None or major == None or sex ==None \
+    if  name == None or age == None or grade == None or major == None or sex ==None or email == None \
              or (not isinstance(age, int)) or (not isinstance(sex, int)) or (not isinstance(grade, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    sql = """UPDATE accounts SET name ="%s",age = "%s", sex="%s",grade="%s",major="%s"WHERE sid= "%s";""" % (
-                 name, age, sex, grade, major, sid)
+    sql = """UPDATE accounts SET name ="%s",age = "%s", sex="%s",grade="%s",major="%s", email="%s" WHERE sid= "%s";""" % (
+                 name, age, sex, grade, major, email, sid)
     tools.modifyOpt(sql)
     msg += "successful"
     session['name'] = name
@@ -119,6 +124,7 @@ def edit_userinfo_model(account):
     session['sex'] = sex_trans(sex)
     session['grade'] = grade_trans(grade)
     session['major'] = major
+    session['email'] = email
     return 200, msg
 
 

@@ -81,10 +81,12 @@ def userinfo():
     grade = session.get('grade')
     sex = session.get('sex')
     phone_num = session.get('phone_num')
+    email = session.get('email')
+    Credibility = session.get('Credibility')
     balance = session.get('balance')
 
     return python_object_to_json(name=name, sid=sid, age=age, major=major, grade=grade,
-                                 sex=sex, phone_num=phone_num, balance=balance)
+                                 sex=sex, phone_num=phone_num, email=email, Credibility=Credibility, balance=balance)
 
 
 # 修改用户资料
