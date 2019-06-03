@@ -90,7 +90,7 @@ def userinfo():
 
 
 # 修改用户资料
-@app.route('/module/user/userinfo', methods=['PUT'])
+@app.route('/module/user/userInfo', methods=['PUT'])
 @login_required_mine
 def edit_userinfo():
     code, msg = edit_userinfo_model(request.json)
