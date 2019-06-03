@@ -27,9 +27,9 @@ def create_questionnaire_model(account):
             content is None or (not isinstance(edit_status, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    if not isinstance(quantity, int):
-        msg += "quantity_must_be_int"
-        return 400, msg
+    #if not isinstance(quantity, int):
+    #    msg += "quantity_must_be_int"
+    #    return 400, msg
     if not isinstance(reward, float):
         msg += "reward_must_be_float"
         return 400, msg
@@ -70,9 +70,9 @@ def edit_questionnaire_model(account):
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
         return 400, msg
-    if not isinstance(reward, float):
-        msg += "quantity_must_be_float"
-        return 400, msg
+    #if not isinstance(reward, float):
+    #    msg += "quantity_must_be_float"
+    #    return 400, msg
     if not select_questionnaire_by_qid(qid):
         msg += "maybe_error_qid"
         return 400, msg
