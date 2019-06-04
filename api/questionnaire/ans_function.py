@@ -94,9 +94,8 @@ def answer_review_model(account):
 
 # 获取所有答卷
 # used in /module/user/answer_get
-def answer_get_model(account):
-    # 解析json得到想要的参数
-    qid = account.get('qid', None)
+def answer_get_model(qid):
+    qid = qid
     msg = ""
     content = []
     # 数据库中查不到对应的问卷id, 即问卷不存在
@@ -123,13 +122,13 @@ def answer_get_model(account):
 
 # 查看具体一份问卷
 # used in /module/user/get_sid_answer
-def get_sid_answer_model(account):
+def get_sid_answer_model(request):
     # 解析json得到想要的参数
-    qid = account.get('qid', None)
-    sid = account.get('sid', None)
+    qid = request.args.get("qid")
+    sid = request.args.get("sid")
     msg = ""
     content = {}
-
+    qid = int(qid)
     # 数据库中查不到对应的答卷id, 即答卷不存在
     if not select_answer_by_sid_and_qid(qid, sid):
         msg += "refused because of maybe_error_qid_and_sid"

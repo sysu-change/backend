@@ -191,10 +191,10 @@ def answer_review():
 
 
 # 获取所有答卷
-@app.route('/module/user/answer_get', methods=['GET'])
+@app.route('/module/user/answer_get/<int:qid>', methods=['GET'])
 @login_required_mine
-def answer_get():
-    code, msg, number, content = answer_get_model(request.json)
+def answer_get(qid):
+    code, msg, number, content = answer_get_model(qid)
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
@@ -202,7 +202,7 @@ def answer_get():
 @app.route('/module/user/get_sid_answer', methods=['GET'])
 @login_required_mine
 def get_sid_answer():
-    code, msg, content = get_sid_answer_model(request.json)
+    code, msg, content = get_sid_answer_model(request)
     return python_object_to_json(code=code, msg=msg, content=content)
 
 
