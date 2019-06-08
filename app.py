@@ -212,7 +212,7 @@ def get_sid_answer():
 
 
 # 奶牛端创建发布任务(后端做的时候添加status, int类型，0：初始值刚发布未完成 1：已完成)
-@app.route('module/user/create_task', methods=['POST'])
+@app.route('/module/user/create_task', methods=['POST'])
 @login_required_mine
 def create_task():
     code, msg = create_task_model(request)
@@ -220,7 +220,7 @@ def create_task():
 
 
 # 学生端申请任务（需求量从数据库调用减1，发送邮件给发起者和接收者，申请接单接单状态accept_status=0）
-@app.route('module/user/apply', methods=['POST'])
+@app.route('/module/user/apply', methods=['POST'])
 @login_required_mine
 def apply():
     code, msg = apply_model(request)
@@ -228,7 +228,7 @@ def apply():
 
 
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
-@app.route('module/user/provider_task_done', methods=['GET'])
+@app.route('/module/user/provider_task_done', methods=['GET'])
 @login_required_mine
 def provider_task_done():
     code, msg, number, content = provider_task_done_model(request)
@@ -236,7 +236,7 @@ def provider_task_done():
 
 
 # 奶牛端查看正在进行中的任务（包括已接单但未完成，和发布中未被接单的任务）
-@app.route('module/user/provider_task_in_progress', methods=['GET'])
+@app.route('/module/user/provider_task_in_progress', methods=['GET'])
 @login_required_mine
 def provider_task_in_progress():
     code, msg, number, content = provider_task_in_progress_model(request)
@@ -244,23 +244,16 @@ def provider_task_in_progress():
 
 
 # 奶牛端和学生端查看具体任务详情
-@app.route('module/user/task/<int:id>', methods=['GET'])
+@app.route('/module/user/task/<int:id>', methods=['GET'])
 @login_required_mine
 def task(id):
     code, msg, content = task_model(id)
     return python_object_to_json(code=code, msg=msg, content=content)
 
 
-# 奶牛端创建发布任务(后端做的时候添加status, int类型，0：初始值刚发布未完成 1：已完成)
-@app.route('module/user/create_task', methods=['POST'])
-@login_required_mine
-def create_task():
-    code, msg = create_task_model(request)
-    return python_object_to_json(code=code, msg=msg)
-
 
 # 学生端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
-@app.route('module/user/student_task_done', methods=['GET'])
+@app.route('/module/user/student_task_done', methods=['GET'])
 @login_required_mine
 def student_task_done():
     code, msg, number, content = student_task_done_model(request)
@@ -269,7 +262,7 @@ def student_task_done():
 
 # 学生端挑选任务，查看到目前系统所有的其他类型任务（要做分页）
 # module/user/select_task?offset={value}&number={value}
-@app.route('module/user/select_task', methods=['GET'])
+@app.route('/module/user/select_task', methods=['GET'])
 @login_required_mine
 def select_task():
     code, msg, number, content = select_task_model(request)
@@ -277,7 +270,7 @@ def select_task():
 
 
 # 审核投诉单
-@app.route('module/user/complaint_handle', methods=['PUT'])
+@app.route('/module/user/complaint_handle', methods=['PUT'])
 @login_required_mine
 def complaint_handle():
     code, msg = complaint_handle_model(request)
@@ -285,7 +278,7 @@ def complaint_handle():
 
 
 # 查看投诉单
-@app.route('module/user/get_complaint/<int:cid>', methods=['GET'])
+@app.route('/module/user/get_complaint/<int:cid>', methods=['GET'])
 @login_required_mine
 def get_complaint(cid):
     code, msg, id, sid1, sid2, reason, photo = get_complaint_model(cid)
@@ -294,7 +287,7 @@ def get_complaint(cid):
 
 
 # 奶牛端和学生端投诉（发送邮件告知被投诉者）
-@app.route('module/user/complaint', methods=['POST'])
+@app.route('/module/user/complaint', methods=['POST'])
 @login_required_mine
 def complaint():
     code, msg, id, sid1, sid2, reason, photo = complaint_model(request)
@@ -303,7 +296,7 @@ def complaint():
 
 
 # 学生端放弃任务（需求量回退一步,邮件告知任务发起者 ）
-@app.route('module/user/task_give_up', methods=['POST'])
+@app.route('/module/user/task_give_up', methods=['POST'])
 @login_required_mine
 def task_give_up():
     code, msg = task_give_up_model(request)
@@ -311,7 +304,7 @@ def task_give_up():
 
 
 # 奶牛端删除任务
-@app.route('module/user/delete_task', methods=['DELETE'])
+@app.route('/module/user/delete_task', methods=['DELETE'])
 @login_required_mine
 def delete_task():
     code, msg = delete_task_model(request)
@@ -319,7 +312,7 @@ def delete_task():
 
 
 # 奶牛端审核任务(审核成功与否都将通过邮箱告知任务接受者)
-@app.route('module/user/task_verify', methods=['PUT'])
+@app.route('/module/user/task_verify', methods=['PUT'])
 @login_required_mine
 def task_verify():
     code, msg = task_verify_model(request)
@@ -327,7 +320,7 @@ def task_verify():
 
 
 # 奶牛端联系接单者（获取接单者部分用户信息）
-@app.route('module/user/contact_receiver/<int:sid>', methods=['GET'])
+@app.route('/module/user/contact_receiver/<int:sid>', methods=['GET'])
 @login_required_mine
 def contact_receiver(sid):
     code, msg, name, sid, phone, email = contact_receiver_model(sid)

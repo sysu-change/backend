@@ -29,6 +29,17 @@ def login_required_mine(func):
     return decorated_view
 
 
+"""
+邮箱函数
+"""
+# eg1：给用户发送问卷审核成功的信息
+# sent_email_answer_message('1415629749@qq.com', 26, 1)
+# eg2：给任务发布者发布任务状态的信息
+# sent_email_to_task_publisher('1415629749@qq.com', 26, 3)
+# eg2：给任务接受者发布任务信息
+# sent_email_to_task_receiver('1415629749@qq.com', 26, 3)
+
+
 # 这个方法只跟问卷有关
 # 答卷审核发送邮件
 def sent_email_answer_message(to, qid, verify):
@@ -159,10 +170,5 @@ def sent_email_to_task_receiver(to, qid, content_num):
     stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
     return True
 
-# eg1：给用户发送问卷审核成功的信息
-# sent_email_answer_message('1415629749@qq.com', 26, 1)
-# eg2：给任务发布者发布任务状态的信息
-# sent_email_to_task_publisher('1415629749@qq.com', 26, 3)
-# eg2：给任务接受者发布任务信息
-# sent_email_to_task_receiver('1415629749@qq.com', 26, 3)
+
 
