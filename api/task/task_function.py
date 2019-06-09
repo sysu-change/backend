@@ -25,6 +25,13 @@ def apply_model(account):
     pass
 
 
+# 学生端完成任务（更新接单状态accept_status=1，邮件通知任务发起者，提醒审核）
+# used in module/user/task_finish
+def task_finish_model(account):
+    # todo
+    pass
+
+
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 # used in module/user/provider_task_done
 def provider_task_done_model(account):

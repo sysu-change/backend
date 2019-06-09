@@ -227,6 +227,14 @@ def apply():
     return python_object_to_json(code=code, msg=msg)
 
 
+# 学生端完成任务（更新接单状态accept_status=1，邮件通知任务发起者，提醒审核）
+@app.route('/module/user/task_finish', methods=['POST'])
+@login_required_mine
+def task_finish():
+    code, msg = task_finish_model(request)
+    return python_object_to_json(code=code, msg=msg)
+
+
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 @app.route('/module/user/provider_task_done', methods=['GET'])
 @login_required_mine
