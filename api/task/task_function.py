@@ -18,13 +18,38 @@ def create_task_model(account):
     # 蔡湘国
     sid = session.get('sid')
     type = account.get('type', None)
+    description = account.get('description', None)
     detail = account.get('detail', None)
     deadline = account.get('deadline', None)
     phone_num = account.get('phone_num', None)
     wechat = account.get('wechat', None)
     quantity = account.get('quantity', None)
     reward = account.get('reward', None)
-    pass
+    status = 0
+    msg = ""
+    if sid is None or type is None or description is None or detail is None or \
+            deadline is None or phone_num is None or wechat is None or \
+            quantity is None or reward is None or (not isinstance(type, int)):
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(quantity, int):
+        msg += "quantity_must_be_int"
+        return 400, msg
+    if not isinstance(reward, float):
+        msg += "reward_must_be_float"
+        return 400, msg
+    cost = reward * quantity
+    if cost > session['balance']:
+        msg += "Insufficient_account_balance"
+        return 400, msg
+    sql = """INSERT INTO task(sid, type, description, detail, deadline, phone_num, wechat, quantity, reward, status)
+                        VALUES ("%s", %d, "%s", "%s", "%s", "%s", "%s", %d, %f, %d);""" % (
+        sid, type, description, detail, deadline, phone_num, wechat, quantity, reward, status)
+    tools.modifyOpt(sql)
+    reduce_balance_by_sid(session['sid'], cost)
+    session['balance'] = session['balance'] - cost
+    msg += "successful"
+    return 200, msg
 
 
 # 学生端申请任务（需求量从数据库调用减1，发送邮件给发起者和接收者，申请接单接单状态accept_status=0）
@@ -45,7 +70,7 @@ def task_finish_model(account):
 
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 # used in module/user/provider_task_done
-def provider_task_done_model(account):
+def provider_task_done_model():
     # todo
     # 蔡湘国
     pass
@@ -53,7 +78,7 @@ def provider_task_done_model(account):
 
 # 奶牛端查看正在进行中的任务（包括已接单但未完成，和发布中未被接单的任务）
 # used in module/user/provider_task_in_progress
-def provider_task_in_progress_model(account):
+def provider_task_in_progress_model():
     # todo
     # 蔡湘国
     pass
@@ -64,7 +89,34 @@ def provider_task_in_progress_model(account):
 def task_model(id):
     # todo
     # 蔡湘国
-    pass
+    tid = id
+    msg = ""
+    # 对应参数为空的情况
+    if id == None:
+        msg += "id can't be empty"
+        return 400, msg, []
+    # 数据库中查不到对应的任务tid, 即任务不存在
+    if not select_task_by_tid(tid):
+        msg += "refused because of maybe_error_tid"
+        return 400, msg, []
+
+    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        content = {}
+        content['tid'] = rows[0]['tid']
+        content['type'] = rows[0]['type']
+        content['description'] = rows[0]['description']
+        content['detail'] = rows[0]['detail']
+        content['deadline'] = rows[0]['deadline']
+        content['phone_num'] = rows[0]['phone_num']
+        content['wechat'] = rows[0]['wechat']
+        msg += "successful"
+        return 200, msg, content
+    else:
+        msg += "no record"
+        content = None
+        return 200, msg, content
 
 
 # 学生端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
@@ -120,7 +172,39 @@ def task_give_up_model(account):
 def delete_task_model(account):
     # todo
     # 蔡湘国
-    pass
+    # 需要学生端接受问卷，所以部分未测试
+    tid = account.get('tid', None)
+    msg = ""
+    # 对应参数为空的情况
+    if tid == None:
+        msg += "tid can't be empty"
+        return 400, msg
+    # 数据库中查不到对应的任务tid, 即任务不存在
+    if not select_task_by_tid(tid):
+        msg += "refused because of maybe_error_tid"
+        return 400, msg
+    # 查看该用户是否是该问卷创始人
+    if not session['sid'] == get_sid_by_tid(tid):
+        msg += "refused because no authority"
+        return 400, msg
+    # 查看是否还存在答卷未审核
+    if get_no_verify_num_by_tid(tid) != 0:
+        msg += "refused because there are still some task no verify"
+        return 400, msg
+
+    # 返还剩下的钱
+    verify_num = get_verify_num_by_tid(tid)
+    quantity = get_quantity_by_tid(tid)
+    reward = get_reward_by_tid(tid)
+    return_monty = (quantity - verify_num) * reward
+    add_balance_by_sid(session['sid'], return_monty)
+    session['balance'] = session['balance'] + return_monty
+    # 删除任务
+    sql = """DELETE FROM task WHERE tid= "%d";""" % (tid)
+    tools.modifyOpt(sql)
+
+    msg += "successful"
+    return 200, msg
 
 
 # 奶牛端审核任务(审核成功与否都将通过邮箱告知任务接受者)
@@ -128,7 +212,37 @@ def delete_task_model(account):
 def task_verify_model(account):
     # todo
     # 蔡湘国
-    pass
+    # 需要学生端接受问卷，所以未测试
+    # 解析json得到想要的参数
+    tid = account.get('tid', None)
+    sid = account.get('sid', None)
+    verify = account.get('verify', None)
+    email = select_email_by_sid(sid)
+    msg = ""
+    # 判断各种异常情况
+    # 对应参数为空的情况
+    if tid == None or sid == None or verify == None:
+        msg += "refused because of Illegal_parameter"
+        return 400, msg
+    # 数据库中查不到对应的任务id, 即任务不存在
+    if not select_task_by_tid(tid):
+        msg += "refused because of maybe_error_tid"
+        return 400, msg
+    # 原来已经审核成功
+    if get_verify_state_by_id(tid, sid) == 1:
+        msg += "already verify successful"
+        return 200, msg
+    # 审核成功更新数据库
+    sql = """UPDATE task_order SET verify =%d WHERE tid= %d AND sid = "%s";""" % (
+        verify, tid, sid)
+    tools.modifyOpt(sql)
+    sent_email_to_task_receiver(email, tid, verify+1)
+    # 现审核成功支付费用
+    money = get_reward_by_tid(tid)
+    if verify == 1:
+        add_balance_by_sid(sid, money)
+    msg += "successful"
+    return 200, msg
 
 
 # 奶牛端联系接单者（获取接单者部分用户信息）
@@ -136,4 +250,13 @@ def task_verify_model(account):
 def contact_receiver_model(sid):
     # todo
     # 蔡湘国
-    pass
+    sql = "SELECT * FROM accounts WHERE sid ='%s'" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        row = rows[0]
+        name = row['name']
+        sid = row['sid']
+        phone_num = row['phone_num']
+        email = row['email']
+    return name, sid, phone_num, email
+

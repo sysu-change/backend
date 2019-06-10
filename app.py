@@ -215,7 +215,7 @@ def get_sid_answer():
 @app.route('/module/user/create_task', methods=['POST'])
 @login_required_mine
 def create_task():
-    code, msg = create_task_model(request)
+    code, msg = create_task_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -239,7 +239,7 @@ def task_finish():
 @app.route('/module/user/provider_task_done', methods=['GET'])
 @login_required_mine
 def provider_task_done():
-    code, msg, number, content = provider_task_done_model(request)
+    code, msg, number, content = provider_task_done_model()
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
@@ -247,7 +247,7 @@ def provider_task_done():
 @app.route('/module/user/provider_task_in_progress', methods=['GET'])
 @login_required_mine
 def provider_task_in_progress():
-    code, msg, number, content = provider_task_in_progress_model(request)
+    code, msg, number, content = provider_task_in_progress_model()
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
@@ -315,7 +315,7 @@ def task_give_up():
 @app.route('/module/user/delete_task', methods=['DELETE'])
 @login_required_mine
 def delete_task():
-    code, msg = delete_task_model(request)
+    code, msg = delete_task_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -323,7 +323,7 @@ def delete_task():
 @app.route('/module/user/task_verify', methods=['PUT'])
 @login_required_mine
 def task_verify():
-    code, msg = task_verify_model(request)
+    code, msg = task_verify_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -331,9 +331,8 @@ def task_verify():
 @app.route('/module/user/contact_receiver/<int:sid>', methods=['GET'])
 @login_required_mine
 def contact_receiver(sid):
-    code, msg, name, sid, phone, email = contact_receiver_model(sid)
-    return python_object_to_json(code=code, msg=msg, name=name,
-                                 sid=sid, phone=phone, email=email)
+    name, sid, phone_num, email = contact_receiver_model(sid)
+    return python_object_to_json(name=name, sid=sid, phone_num=phone_num, email=email)
 
 
 if __name__ == '__main__':
