@@ -15,6 +15,15 @@ from .utils import *
 # used in module/user/create_task
 def create_task_model(account):
     # todo
+    # 蔡湘国
+    sid = session.get('sid')
+    type = account.get('type', None)
+    detail = account.get('detail', None)
+    deadline = account.get('deadline', None)
+    phone_num = account.get('phone_num', None)
+    wechat = account.get('wechat', None)
+    quantity = account.get('quantity', None)
+    reward = account.get('reward', None)
     pass
 
 
@@ -22,6 +31,7 @@ def create_task_model(account):
 # used in module/user/apply
 def apply_model(account):
     # todo
+    # 陈笑儒
     pass
 
 
@@ -29,6 +39,7 @@ def apply_model(account):
 # used in module/user/task_finish
 def task_finish_model(account):
     # todo
+    # 陈笑儒
     pass
 
 
@@ -36,6 +47,7 @@ def task_finish_model(account):
 # used in module/user/provider_task_done
 def provider_task_done_model(account):
     # todo
+    # 蔡湘国
     pass
 
 
@@ -43,6 +55,7 @@ def provider_task_done_model(account):
 # used in module/user/provider_task_in_progress
 def provider_task_in_progress_model(account):
     # todo
+    # 蔡湘国
     pass
 
 
@@ -50,6 +63,7 @@ def provider_task_in_progress_model(account):
 # used in module/user/task/<int:id>
 def task_model(id):
     # todo
+    # 蔡湘国
     pass
 
 
@@ -57,6 +71,7 @@ def task_model(id):
 # used in module/user/student_task_done
 def student_task_done_model(account):
     # todo
+    # 陈笑儒
     pass
 
 
@@ -64,6 +79,7 @@ def student_task_done_model(account):
 # used in module/user/select_task?offset={value}&number={value}
 def select_task_model(account):
     # todo
+    # 陈笑儒
     pass
 
 
@@ -71,6 +87,7 @@ def select_task_model(account):
 # used in module/user/complaint_handle
 def complaint_handle_model(account):
     # todo
+    # 唐育涛
     pass
 
 
@@ -78,6 +95,7 @@ def complaint_handle_model(account):
 # used in module/user/get_complaint/<int:cid>
 def get_complaint_model(cid):
     # todo
+    # 唐育涛
     pass
 
 
@@ -85,6 +103,7 @@ def get_complaint_model(cid):
 # used in module/user/complaint
 def complaint_model(account):
     # todo
+    # 唐育涛
     pass
 
 
@@ -92,6 +111,7 @@ def complaint_model(account):
 # used in module/user/task_give_up
 def task_give_up_model(account):
     # todo
+    # 陈笑儒
     pass
 
 
@@ -99,6 +119,7 @@ def task_give_up_model(account):
 # used in module/user/delete_task
 def delete_task_model(account):
     # todo
+    # 蔡湘国
     pass
 
 
@@ -106,6 +127,7 @@ def delete_task_model(account):
 # used in module/user/task_verify
 def task_verify_model(account):
     # todo
+    # 蔡湘国
     pass
 
 
@@ -113,4 +135,5 @@ def task_verify_model(account):
 # used in module/user/contact_receiver/<int:sid>
 def contact_receiver_model(sid):
     # todo
+    # 蔡湘国
     pass
