@@ -223,7 +223,7 @@ def create_task():
 @app.route('/module/user/apply', methods=['POST'])
 @login_required_mine
 def apply():
-    code, msg = apply_model(request)
+    code, msg = apply_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -231,7 +231,7 @@ def apply():
 @app.route('/module/user/task_finish', methods=['POST'])
 @login_required_mine
 def task_finish():
-    code, msg = task_finish_model(request)
+    code, msg = task_finish_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 
@@ -259,12 +259,19 @@ def task(id):
     return python_object_to_json(code=code, msg=msg, content=content)
 
 
-
 # 学生端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 @app.route('/module/user/student_task_done', methods=['GET'])
 @login_required_mine
 def student_task_done():
     code, msg, number, content = student_task_done_model(request)
+    return python_object_to_json(code=code, msg=msg, number=number, content=content)
+
+
+# 学生端查看正在进行中的任务
+@app.route('/module/user/student_task_in_progress', methods=['GET'])
+@login_required_mine
+def student_task_in_progress():
+    code, msg, number, content = student_task_in_progress_model(request)
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
@@ -289,8 +296,8 @@ def complaint_handle():
 @app.route('/module/user/get_complaint/<int:cid>', methods=['GET'])
 @login_required_mine
 def get_complaint(cid):
-    code, msg, id, sid1, sid2, reason, photo = get_complaint_model(cid)
-    return python_object_to_json(code=code, msg=msg, id=id, sid1=sid1,
+    code, msg, tid, sid1, sid2, reason, photo = get_complaint_model(cid)
+    return python_object_to_json(code=code, msg=msg, tid=tid, sid1=sid1,
                                  sid2=sid2, reason=reason, photo=photo)
 
 
@@ -298,16 +305,15 @@ def get_complaint(cid):
 @app.route('/module/user/complaint', methods=['POST'])
 @login_required_mine
 def complaint():
-    code, msg, id, sid1, sid2, reason, photo = complaint_model(request)
-    return python_object_to_json(code=code, msg=msg, id=id, sid1=sid1,
-                                 sid2=sid2, reason=reason, photo=photo)
+    code, msg = complaint_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 # 学生端放弃任务（需求量回退一步,邮件告知任务发起者 ）
 @app.route('/module/user/task_give_up', methods=['POST'])
 @login_required_mine
 def task_give_up():
-    code, msg = task_give_up_model(request)
+    code, msg = task_give_up_model(request.json)
     return python_object_to_json(code=code, msg=msg)
 
 

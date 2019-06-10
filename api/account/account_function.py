@@ -24,7 +24,7 @@ def login_auth(account):
         return code, msg
     password = hash_password(password, salt)
     isAuth = False
-    sql = "SELECT * FROM accounts WHERE phone_num ='%s' AND password = '%s'" % \
+    sql = "SELECT * FROM accounts WHERE phone_num='%s' AND password='%s'" % \
           (phone_num, password)
     rows = tools.selectOpt(sql)
     # current_app.logger.info('查询结果>>>', rows)
@@ -66,7 +66,6 @@ def register_account(account):
     email = account.get('email', None)
     Credibility = 100
     password = account.get('password', None)
-
 
     # 密码加密逻辑，生成26位字符串，对前端传来的密码进行盐值加密之后存进数据库
     salt = random_code(26)
@@ -115,7 +114,7 @@ def edit_userinfo_model(account):
              or (not isinstance(age, int)) or (not isinstance(sex, int)) or (not isinstance(grade, int)):
         msg += "Illegal_parameter"
         return 400, msg
-    sql = """UPDATE accounts SET name ="%s",age = "%s", sex="%s",grade="%s",major="%s", email="%s" WHERE sid= "%s";""" % (
+    sql = """UPDATE accounts SET name="%s",age="%s", sex="%s",grade="%s",major="%s", email="%s" WHERE sid="%s";""" % (
                  name, age, sex, grade, major, email, sid)
     tools.modifyOpt(sql)
     msg += "successful"
@@ -143,7 +142,7 @@ def user_recharge_model(account):
     if not select_user_by_phone_num(phone_num):
         msg += "not_registered_phone_num"
         return 400, msg
-    sql = """UPDATE accounts SET balance = balance+"%s" WHERE phone_num= "%s";""" % (
+    sql = """UPDATE accounts SET balance = balance+"%s" WHERE phone_num="%s";""" % (
         money, phone_num)
     tools.modifyOpt(sql)
     msg += "successful"
@@ -175,7 +174,7 @@ def user_withdraw_model(account):
     if not password == right_pass:
         msg += "error_password"
         return 400, msg
-    sql = """UPDATE accounts SET balance = balance-"%s"WHERE phone_num= "%s";""" % (
+    sql = """UPDATE accounts SET balance = balance-"%s"WHERE phone_num="%s";""" % (
         money, session['phone_num'])
     tools.modifyOpt(sql)
     msg += "successful"

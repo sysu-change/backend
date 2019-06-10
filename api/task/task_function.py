@@ -14,7 +14,6 @@ from .utils import *
 # 奶牛端创建发布任务(后端做的时候添加status, int类型，0：初始值刚发布未完成 1：已完成)
 # used in module/user/create_task
 def create_task_model(account):
-    # todo
     # 蔡湘国
     sid = session.get('sid')
     type = account.get('type', None)
@@ -55,17 +54,78 @@ def create_task_model(account):
 # 学生端申请任务（需求量从数据库调用减1，发送邮件给发起者和接收者，申请接单接单状态accept_status=0）
 # used in module/user/apply
 def apply_model(account):
-    # todo
     # 陈笑儒
-    pass
+    tid = account.get('tid', None)
+    sid = session.get('sid')
+
+    msg = ""
+    if tid is None:
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(tid, int):
+        msg += "tid_must_be_int"
+        return 400, msg
+
+    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
+    rows = tools.selectOpt(sql)
+    if rows and rows[0]['quantity'] <= 0:
+        msg += "the applier of this task is full"
+        return 400, msg
+    if not rows:
+        msg += "no this task"
+        return 400, msg
+
+    sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        msg += "you have already applied this task"
+        return 400, msg
+
+    sql = """UPDATE task SET quantity = quantity-1 WHERE tid="%d";""" % (tid)
+    tools.modifyOpt(sql)
+    sql = """INSERT INTO task_order(tid, sid, accept_status, verify, reward_status)
+                            VALUES ("%d", %s, "%d", "%d", "%d");""" % (tid, sid, 0, 0, 0)
+    tools.modifyOpt(sql)
+
+    msg += "successful"
+    return 200, msg
 
 
 # 学生端完成任务（更新接单状态accept_status=1，邮件通知任务发起者，提醒审核）
 # used in module/user/task_finish
 def task_finish_model(account):
-    # todo
     # 陈笑儒
-    pass
+    tid = account.get('tid', None)
+    sid = session.get('sid')
+
+    msg = ""
+    if tid is None:
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(tid, int):
+        msg += "tid_must_be_int"
+        return 400, msg
+
+    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
+    rows = tools.selectOpt(sql)
+    if rows is None:
+        msg += "no this task"
+        return 400, msg
+
+    sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
+    rows = tools.selectOpt(sql)
+    if not rows:
+        msg += "you haven't applied this task"
+        return 400, msg
+    elif rows[0]['accept_status'] == 1:
+        msg += "you have already finished this task"
+        return 400, msg
+
+    sql = """UPDATE task_order SET accept_status = 1 WHERE tid='%d' and sid='%s';""" % (tid, sid)
+    tools.modifyOpt(sql)
+
+    msg += "successful"
+    return 200, msg
 
 
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
@@ -87,7 +147,6 @@ def provider_task_in_progress_model():
 # 奶牛端和学生端查看具体任务详情
 # used in module/user/task/<int:id>
 def task_model(id):
-    # todo
     # 蔡湘国
     tid = id
     msg = ""
@@ -100,7 +159,7 @@ def task_model(id):
         msg += "refused because of maybe_error_tid"
         return 400, msg, []
 
-    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
+    sql = "SELECT * FROM task WHERE tid='%d'" % (tid)
     rows = tools.selectOpt(sql)
     if rows:
         content = {}
@@ -122,17 +181,100 @@ def task_model(id):
 # 学生端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 # used in module/user/student_task_done
 def student_task_done_model(account):
-    # todo
     # 陈笑儒
-    pass
+    sid = session.get('sid')
+
+    content = []
+    msg = ""
+
+    sql = "(SELECT * FROM task t1,task_order t2 where " \
+          "t1.tid=t2.tid and t2.sid='%s' and accept_status=1)" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['sid'] = rows[i]['sid']
+            temp['deadline'] = rows[i]['deadline']
+            temp['reward'] = rows[i]['reward']
+            temp['reward_status'] = rows[i]['reward_status']
+            content.append(temp)
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
+    else:
+        msg += "no record"
+        return 200, msg, 0, content
+
+
+# 学生端查看正在进行中的任务
+# used in module/user/student_task_in_progress
+def student_task_in_progress_model(account):
+    # 陈笑儒
+    sid = session.get('sid')
+
+    content = []
+    msg = ""
+
+    sql = "(SELECT * FROM task t1,task_order t2 where " \
+          "t1.tid=t2.tid and t2.sid='%s' and accept_status=0)" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['sid'] = rows[i]['sid']
+            temp['deadline'] = rows[i]['deadline']
+            temp['reward'] = rows[i]['reward']
+            temp['reward_status'] = rows[i]['reward_status']
+            content.append(temp)
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
+    else:
+        msg += "no record"
+        return 200, msg, 0, content
 
 
 # 学生端挑选任务，查看到目前系统所有的其他类型任务（要做分页）
 # used in module/user/select_task?offset={value}&number={value}
 def select_task_model(account):
-    # todo
     # 陈笑儒
-    pass
+    offset = request.args.get("offset")
+    number = request.args.get("number")
+    sid = session.get('sid')
+
+    content = []
+    msg = ""
+
+    if offset is None or number is None or not (offset.isdigit() and number.isdigit()):
+        msg += "invalid parameter"
+        number = 0
+        return 400, msg, number, content
+
+    offset = int(offset)
+    number = int(number)
+
+    sql = "SELECT * FROM task where tid not in" \
+          "(SELECT tid FROM task_order where sid = '%s')" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(offset, min(len(rows), offset + number)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['description'] = rows[i]['description']
+            temp['quantity'] = rows[i]['quantity']
+            temp['reward'] = rows[i]['reward']
+            content.append(temp)
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
+    else:
+        msg += "no record"
+        return 200, msg, 0, content
 
 
 # 审核投诉单
@@ -162,15 +304,45 @@ def complaint_model(account):
 # 学生端放弃任务（需求量回退一步,邮件告知任务发起者 ）
 # used in module/user/task_give_up
 def task_give_up_model(account):
-    # todo
     # 陈笑儒
-    pass
+    tid = account.get('tid', None)
+    sid = session.get('sid')
+
+    msg = ""
+    if tid is None:
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(tid, int):
+        msg += "tid_must_be_int"
+        return 400, msg
+
+    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
+    rows = tools.selectOpt(sql)
+    if rows is None:
+        msg += "no this task"
+        return 400, msg
+
+    sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
+    rows = tools.selectOpt(sql)
+    if rows is None:
+        msg += "you haven't applied this task"
+        return 400, msg
+    elif rows[0]['accept_status'] == 1:
+        msg += "you have already finished this task"
+        return 400, msg
+
+    sql = """UPDATE task SET quantity = quantity+1 WHERE tid="%d";""" % (tid)
+    tools.modifyOpt(sql)
+    sql = """DELETE FROM task_order WHERE tid="%d" and sid="%s";""" % (tid, sid)
+    tools.modifyOpt(sql)
+
+    msg += "successful"
+    return 200, msg
 
 
 # 奶牛端删除任务
 # used in module/user/delete_task
 def delete_task_model(account):
-    # todo
     # 蔡湘国
     # 需要学生端接受问卷，所以部分未测试
     tid = account.get('tid', None)
@@ -200,7 +372,7 @@ def delete_task_model(account):
     add_balance_by_sid(session['sid'], return_monty)
     session['balance'] = session['balance'] + return_monty
     # 删除任务
-    sql = """DELETE FROM task WHERE tid= "%d";""" % (tid)
+    sql = """DELETE FROM task WHERE tid="%d";""" % (tid)
     tools.modifyOpt(sql)
 
     msg += "successful"
@@ -210,7 +382,6 @@ def delete_task_model(account):
 # 奶牛端审核任务(审核成功与否都将通过邮箱告知任务接受者)
 # used in module/user/task_verify
 def task_verify_model(account):
-    # todo
     # 蔡湘国
     # 需要学生端接受问卷，所以未测试
     # 解析json得到想要的参数
@@ -233,7 +404,7 @@ def task_verify_model(account):
         msg += "already verify successful"
         return 200, msg
     # 审核成功更新数据库
-    sql = """UPDATE task_order SET verify =%d WHERE tid= %d AND sid = "%s";""" % (
+    sql = """UPDATE task_order SET verify=%d WHERE tid=%d AND sid="%s";""" % (
         verify, tid, sid)
     tools.modifyOpt(sql)
     sent_email_to_task_receiver(email, tid, verify+1)
@@ -248,9 +419,8 @@ def task_verify_model(account):
 # 奶牛端联系接单者（获取接单者部分用户信息）
 # used in module/user/contact_receiver/<int:sid>
 def contact_receiver_model(sid):
-    # todo
     # 蔡湘国
-    sql = "SELECT * FROM accounts WHERE sid ='%s'" % (sid)
+    sql = "SELECT * FROM accounts WHERE sid='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         row = rows[0]

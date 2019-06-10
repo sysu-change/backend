@@ -126,7 +126,7 @@ def delete_questionnaire_model(account):
         add_balance_by_sid(session['sid'], return_monty)
         session['balance'] = session['balance'] + return_monty
     # 删除问卷
-    sql = """DELETE FROM questiontable WHERE qid= "%d";""" % \
+    sql = """DELETE FROM questiontable WHERE qid="%d";""" % \
           (qid)
     tools.modifyOpt(sql)
 
@@ -144,7 +144,7 @@ def questionnaire_own_model(account):
     if sid is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg, 0, content
-    sql = "SELECT * FROM questiontable WHERE sid ='%s'" % (sid)
+    sql = "SELECT * FROM questiontable WHERE sid='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
@@ -179,7 +179,7 @@ def questionnaire_spec_model(qid):
         msg += "refused because of maybe_error_qid"
         return 400, msg, []
 
-    sql = "SELECT * FROM questiontable WHERE qid ='%d'" % (qid)
+    sql = "SELECT * FROM questiontable WHERE qid='%d'" % (qid)
     rows = tools.selectOpt(sql)
     if rows:
         content = rows[0]

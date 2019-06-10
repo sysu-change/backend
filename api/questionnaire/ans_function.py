@@ -49,8 +49,8 @@ def answer_put_forward_model(account):
 
     # 成功插入答卷表更新数据库
     sql = """INSERT INTO answertable(qid, sid, ans_time, verify, content)
-                                                    VALUES ("%d", "%s", "%s", %d ,"%s");""" % (
-        qid, sid, ans_time, verify, content)
+             VALUES ("%d", "%s", "%s", %d ,"%s");""" % \
+            (qid, sid, ans_time, verify, content)
     tools.modifyOpt(sql)
     msg += "successful"
     return 200, msg
@@ -79,7 +79,7 @@ def answer_review_model(account):
         msg += "already verify successful"
         return 200, msg
     # 审核成功更新数据库
-    sql = """UPDATE answertable SET verify =%d WHERE qid= %d AND sid = "%s";""" % (
+    sql = """UPDATE answertable SET verify=%d WHERE qid=%d AND sid ="%s";""" % (
         verify, qid, sid)
     tools.modifyOpt(sql)
     current_app.logger.info(email)
@@ -102,7 +102,7 @@ def answer_get_model(qid):
     if not select_questionnaire_by_qid(qid):
         msg += "refused because of maybe_error_qid"
         return 400, msg, 0, content
-    sql = "SELECT * FROM answertable WHERE qid =%d" % (qid)
+    sql = "SELECT * FROM answertable WHERE qid=%d" % (qid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
@@ -133,7 +133,7 @@ def get_sid_answer_model(request):
     if not select_answer_by_sid_and_qid(qid, sid):
         msg += "refused because of maybe_error_qid_and_sid"
         return 400, msg, content
-    sql = "SELECT * FROM answertable WHERE qid =%d AND sid ='%s'" % (qid, sid)
+    sql = "SELECT * FROM answertable WHERE qid=%d AND sid='%s'" % (qid, sid)
     rows = tools.selectOpt(sql)
     if rows:
         content = rows[0]
