@@ -133,6 +133,28 @@ def task_finish_model(account):
 def provider_task_done_model():
     # todo
     # 蔡湘国
+    sid = session.get('sid')
+    content = []
+    msg = ""
+    sql = "(SELECT * FROM task t1,task_order t2 where " \
+          "t1.tid=t2.tid and t1.sid='%s' and accept_status=1)" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['reward'] = rows[i]['reward']
+            temp['sid'] = rows[i]['sid']
+            temp['accept_status'] = rows[i]['accept_status']
+            temp['verify'] = rows[i]['verify']
+            content.append(temp)
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
+    else:
+        msg += "no record"
+        return 200, msg, 0, content
     pass
 
 
@@ -141,7 +163,45 @@ def provider_task_done_model():
 def provider_task_in_progress_model():
     # todo
     # 蔡湘国
-    pass
+    sid = session.get('sid')
+    content = []
+    msg = ""
+    # 已接单未完成
+    sql = "(SELECT * FROM task t1,task_order t2 where " \
+          "t1.tid=t2.tid and t1.sid='%s' and accept_status=0)" % (sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['deadline'] = rows[i]['deadline']
+            temp['reward'] = rows[i]['reward']
+            temp['quantity'] = rows[i]['quantity']
+            acc_num = compute_accept_num(rows[i]['tid'])
+            temp['accept_num'] = acc_num
+            content.append(temp)
+    # 已发布未被接单
+    sql2 = "(SELECT * FROM task t1 where (SELECT COUNT(1) FROM task_order t2 where t1.tid=t2.tid)=0 AND t1.sid='%s')" % (sid)
+    rows = tools.selectOpt(sql2)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['tid'] = rows[i]['tid']
+            temp['type'] = rows[i]['type']
+            temp['deadline'] = rows[i]['deadline']
+            temp['reward'] = rows[i]['reward']
+            temp['quantity'] = rows[i]['quantity']
+            acc_num = compute_accept_num(rows[i]['tid'])
+            temp['accept_num'] = acc_num
+            content.append(temp)
+    if len(content) == 0:
+        msg += "no record"
+        return 200, msg, 0, content
+    else:
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
 
 
 # 奶牛端和学生端查看具体任务详情
@@ -183,7 +243,6 @@ def task_model(id):
 def student_task_done_model(account):
     # 陈笑儒
     sid = session.get('sid')
-
     content = []
     msg = ""
 
@@ -213,7 +272,6 @@ def student_task_done_model(account):
 def student_task_in_progress_model(account):
     # 陈笑儒
     sid = session.get('sid')
-
     content = []
     msg = ""
 
@@ -344,7 +402,7 @@ def task_give_up_model(account):
 # used in module/user/delete_task
 def delete_task_model(account):
     # 蔡湘国
-    # 需要学生端接受问卷，所以部分未测试
+    # 需要学生端接受任务，所以部分未测试
     tid = account.get('tid', None)
     msg = ""
     # 对应参数为空的情况
@@ -355,11 +413,11 @@ def delete_task_model(account):
     if not select_task_by_tid(tid):
         msg += "refused because of maybe_error_tid"
         return 400, msg
-    # 查看该用户是否是该问卷创始人
+    # 查看该用户是否是该任务创始人
     if not session['sid'] == get_sid_by_tid(tid):
         msg += "refused because no authority"
         return 400, msg
-    # 查看是否还存在答卷未审核
+    # 查看是否还存在任务未审核
     if get_no_verify_num_by_tid(tid) != 0:
         msg += "refused because there are still some task no verify"
         return 400, msg
@@ -407,11 +465,14 @@ def task_verify_model(account):
     sql = """UPDATE task_order SET verify=%d WHERE tid=%d AND sid="%s";""" % (
         verify, tid, sid)
     tools.modifyOpt(sql)
-    sent_email_to_task_receiver(email, tid, verify+1)
+    # sent_email_to_task_receiver(email, tid, verify+1)
     # 现审核成功支付费用
     money = get_reward_by_tid(tid)
     if verify == 1:
         add_balance_by_sid(sid, money)
+        sql = """UPDATE task_order SET reward_status=%d WHERE tid=%d AND sid="%s";""" % (
+            1, tid, sid)
+        tools.modifyOpt(sql)
     msg += "successful"
     return 200, msg
 

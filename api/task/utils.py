@@ -69,3 +69,10 @@ def get_verify_state_by_id(tid, sid):
         return rows[0]['verify']
     else:
         return 0
+
+
+# 根据tid计算接单人数
+def compute_accept_num(tid):
+    sql = "SELECT count(*) FROM task_order WHERE tid = %d" % (tid)
+    rows = tools.selectOpt(sql)
+    return rows[0]['count(*)']
