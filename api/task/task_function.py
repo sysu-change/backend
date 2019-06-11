@@ -74,6 +74,10 @@ def apply_model(account):
     if not rows:
         msg += "no this task"
         return 400, msg
+    p_sid = rows[0]['sid']
+    if p_sid == sid:
+        msg += "you can't apply task you created"
+        return 400, msg
 
     sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
     rows = tools.selectOpt(sql)
@@ -86,6 +90,11 @@ def apply_model(account):
     sql = """INSERT INTO task_order(tid, sid, accept_status, verify, reward_status)
                             VALUES ("%d", %s, "%d", "%d", "%d");""" % (tid, sid, 0, 0, 0)
     tools.modifyOpt(sql)
+
+    email_publisher = select_email_by_sid(p_sid)
+    email_receiver = select_email_by_sid(sid)
+    sent_email_to_task_publisher(email_publisher, tid, 1)
+    sent_email_to_task_receiver(email_receiver, tid, 1)
 
     msg += "successful"
     return 200, msg
@@ -111,6 +120,7 @@ def task_finish_model(account):
     if rows is None:
         msg += "no this task"
         return 400, msg
+    p_sid = rows[0]['sid']
 
     sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
     rows = tools.selectOpt(sql)
@@ -123,6 +133,9 @@ def task_finish_model(account):
 
     sql = """UPDATE task_order SET accept_status = 1 WHERE tid='%d' and sid='%s';""" % (tid, sid)
     tools.modifyOpt(sql)
+
+    email_publisher = select_email_by_sid(p_sid)
+    sent_email_to_task_publisher(email_publisher, tid, 2)
 
     msg += "successful"
     return 200, msg
@@ -379,6 +392,7 @@ def task_give_up_model(account):
     if rows is None:
         msg += "no this task"
         return 400, msg
+    p_sid = rows[0]['sid']
 
     sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
     rows = tools.selectOpt(sql)
@@ -393,6 +407,9 @@ def task_give_up_model(account):
     tools.modifyOpt(sql)
     sql = """DELETE FROM task_order WHERE tid="%d" and sid="%s";""" % (tid, sid)
     tools.modifyOpt(sql)
+
+    email_publisher = select_email_by_sid(p_sid)
+    sent_email_to_task_publisher(email_publisher, tid, 3)
 
     msg += "successful"
     return 200, msg

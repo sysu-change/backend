@@ -82,7 +82,7 @@ def sent_email_answer_message(to, qid, verify):
 # to 表示收件方邮件地址 可以是qq邮箱 163邮箱 126邮箱 等等各类邮箱
 # qid 表示任务的内容的编号
 # content_num 表示要发给用户的内容的选择
-def sent_email_to_task_publisher(to, qid, content_num):
+def sent_email_to_task_publisher(to, tid, content_num):
     # QQ邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
     host = 'smtp.qq.com'
@@ -110,13 +110,13 @@ def sent_email_to_task_publisher(to, qid, content_num):
 
     # content_num == 1 ,提示任务发布者已经有人接受任务
     if content_num == 1:
-        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(qid) + '的任务已经有人接受任务，对方将第一时间联系您，请注意！详细情况登陆闲钱宝查看'
+        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(tid) + '的任务已经有人接受任务，对方将第一时间联系您，请注意！详细情况登陆闲钱宝查看'
     # content_num == 2 ,提示任务发布者已经有人完成任务，注意审核
     if content_num == 2:
-        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(qid) + '的任务已经完成任务，请注意登陆系统进行任务审核！详细情况登陆闲钱宝查看'
+        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(tid) + '的任务已经完成任务，请注意登陆系统进行任务审核！详细情况登陆闲钱宝查看'
     # content_num == 3 ,提示任务发布者对方取消任务，注意任务状态
     if content_num == 3:
-        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(qid) + '的任务对方已经取消了任务，您的任务状态重新变更为发布中，请注意！详细情况登陆闲钱宝查看'
+        content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(tid) + '的任务对方已经取消了任务，您的任务状态重新变更为发布中，请注意！详细情况登陆闲钱宝查看'
     # 接下去有什么要回复的内容记得在这里添加
 
     msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content ])
@@ -129,7 +129,7 @@ def sent_email_to_task_publisher(to, qid, content_num):
 # to 表示收件方邮件地址 可以是qq邮箱 163邮箱 126邮箱 等等各类邮箱
 # qid 表示任务的内容的编号
 # content_num 表示要发给用户的内容的选择
-def sent_email_to_task_receiver(to, qid, content_num):
+def sent_email_to_task_receiver(to, tid, content_num):
     # QQ邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
     host = 'smtp.qq.com'
@@ -157,13 +157,13 @@ def sent_email_to_task_receiver(to, qid, content_num):
 
     # content_num == 1 ,提示任务接受者接受任务记得完成
     if content_num == 1:
-        content = '任务提醒！您在闲钱宝上接受了任务编号为：' + str(qid) + '的任务，请注意第一时间联系任务发布者完成任务！详细情况登陆闲钱宝查看'
+        content = '任务提醒！您在闲钱宝上接受了任务编号为：' + str(tid) + '的任务，请注意第一时间联系任务发布者完成任务！详细情况登陆闲钱宝查看'
     # content_num == 2 ,提示任务接受者任务审核成功，赏金到账
     if content_num == 2:
-        content = '恭喜您！在闲钱宝关于任务ID为' + str(qid) + '的任务审核通过，赏金已经发布到您的账户，请注意查收！详细情况登陆闲钱宝查看'
+        content = '恭喜您！在闲钱宝关于任务ID为' + str(tid) + '的任务审核通过，赏金已经发布到您的账户，请注意查收！详细情况登陆闲钱宝查看'
     # content_num == 3 ,提示任务接受者任务失败，没有赏金
     if content_num == 3:
-        content = '非常抱歉！您在闲钱宝关于任务ID为' + str(qid) + '的任务未能通过审核，可以联系任务发布者解释原因，有其他不满可以进行投诉！详细情况登陆闲钱宝查看'
+        content = '非常抱歉！您在闲钱宝关于任务ID为' + str(tid) + '的任务未能通过审核，可以联系任务发布者解释原因，有其他不满可以进行投诉！详细情况登陆闲钱宝查看'
     # 接下去有什么要回复的内容记得在这里添加
 
     msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content])
