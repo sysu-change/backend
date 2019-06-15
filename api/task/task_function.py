@@ -91,10 +91,10 @@ def apply_model(account):
                             VALUES ("%d", %s, "%d", "%d", "%d");""" % (tid, sid, 0, 0, 0)
     tools.modifyOpt(sql)
 
-    email_publisher = select_email_by_sid(p_sid)
-    email_receiver = select_email_by_sid(sid)
-    sent_email_to_task_publisher(email_publisher, tid, 1)
-    sent_email_to_task_receiver(email_receiver, tid, 1)
+    # email_publisher = select_email_by_sid(p_sid)
+    # email_receiver = select_email_by_sid(sid)
+    # sent_email_to_task_publisher(email_publisher, tid, 1)
+    # sent_email_to_task_receiver(email_receiver, tid, 1)
 
     msg += "successful"
     return 200, msg
@@ -115,6 +115,11 @@ def task_finish_model(account):
         msg += "tid_must_be_int"
         return 400, msg
 
+    # ************
+    #  todo：下面这段代码封装使用  不要这里调数据库
+    #  todo：而且这里有bug  我输入tid = 22 网页直接崩掉  没有达到预期效果
+    # ************
+
     sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
     rows = tools.selectOpt(sql)
     if rows is None:
@@ -134,8 +139,8 @@ def task_finish_model(account):
     sql = """UPDATE task_order SET accept_status = 1 WHERE tid='%d' and sid='%s';""" % (tid, sid)
     tools.modifyOpt(sql)
 
-    email_publisher = select_email_by_sid(p_sid)
-    sent_email_to_task_publisher(email_publisher, tid, 2)
+    # email_publisher = select_email_by_sid(p_sid)
+    # sent_email_to_task_publisher(email_publisher, tid, 2)
 
     msg += "successful"
     return 200, msg
@@ -144,7 +149,6 @@ def task_finish_model(account):
 # 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
 # used in module/user/provider_task_done
 def provider_task_done_model():
-    # todo
     # 蔡湘国
     sid = session.get('sid')
     content = []
@@ -174,7 +178,10 @@ def provider_task_done_model():
 # 奶牛端查看正在进行中的任务（包括已接单但未完成，和发布中未被接单的任务）
 # used in module/user/provider_task_in_progress
 def provider_task_in_progress_model():
-    # todo
+    # ************
+    #  todo： 一项任务 审批成功的人数 ==需求人数为任务完成  其他都是未完成  这里返还信息出错
+    # ************
+
     # 蔡湘国
     sid = session.get('sid')
     content = []
@@ -387,6 +394,11 @@ def task_give_up_model(account):
         msg += "tid_must_be_int"
         return 400, msg
 
+    # ************
+    #  todo：下面这段代码封装使用  不要这里调数据库
+    #  todo：而且这里有bug  我输入tid = 22 或者tid =9 网页直接崩掉  没有达到预期效果
+    # ************
+
     sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
     rows = tools.selectOpt(sql)
     if rows is None:
@@ -408,8 +420,8 @@ def task_give_up_model(account):
     sql = """DELETE FROM task_order WHERE tid="%d" and sid="%s";""" % (tid, sid)
     tools.modifyOpt(sql)
 
-    email_publisher = select_email_by_sid(p_sid)
-    sent_email_to_task_publisher(email_publisher, tid, 3)
+    # email_publisher = select_email_by_sid(p_sid)
+    # sent_email_to_task_publisher(email_publisher, tid, 3)
 
     msg += "successful"
     return 200, msg
@@ -420,6 +432,15 @@ def task_give_up_model(account):
 def delete_task_model(account):
     # 蔡湘国
     # 需要学生端接受任务，所以部分未测试
+
+    # ************
+    #  todo： 如果数据库中有人接单 并且我已经审批了  删除任务网页会崩溃
+    # ************
+
+    # ************
+    #  todo： 考虑好账户关系  我的任务单有一个人接了  但是我审核他失败 那么我删除任务应该退还我全款
+    # ************
+
     tid = account.get('tid', None)
     msg = ""
     # 对应参数为空的情况
@@ -465,6 +486,15 @@ def task_verify_model(account):
     verify = account.get('verify', None)
     email = select_email_by_sid(sid)
     msg = ""
+
+    # ************
+    #  todo： 奶牛端审核失败的后果就是需求量重新 +1
+    # ************
+
+    # ************
+    #  todo： 一个不存在的接单 我拿来审核却告诉我审核成功
+    # ************
+
     # 判断各种异常情况
     # 对应参数为空的情况
     if tid == None or sid == None or verify == None:
@@ -497,6 +527,11 @@ def task_verify_model(account):
 # 奶牛端联系接单者（获取接单者部分用户信息）
 # used in module/user/contact_receiver/<int:sid>
 def contact_receiver_model(sid):
+
+    # ************
+    # todo：未注册的学号获取信息会网页崩溃
+    # ************
+
     # 蔡湘国
     sql = "SELECT * FROM accounts WHERE sid='%s'" % (sid)
     rows = tools.selectOpt(sql)
