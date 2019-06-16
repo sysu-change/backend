@@ -115,17 +115,9 @@ def task_finish_model(account):
         msg += "tid_must_be_int"
         return 400, msg
 
-    # ************
-    #  todo：下面这段代码封装使用  不要这里调数据库
-    #  todo：而且这里有bug  我输入tid = 22 网页直接崩掉  没有达到预期效果
-    # ************
-
-    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
-    rows = tools.selectOpt(sql)
-    if rows is None:
+    if not select_task_by_tid(tid):
         msg += "no this task"
         return 400, msg
-    p_sid = rows[0]['sid']
 
     sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
     rows = tools.selectOpt(sql)
@@ -394,21 +386,13 @@ def task_give_up_model(account):
         msg += "tid_must_be_int"
         return 400, msg
 
-    # ************
-    #  todo：下面这段代码封装使用  不要这里调数据库
-    #  todo：而且这里有bug  我输入tid = 22 或者tid =9 网页直接崩掉  没有达到预期效果
-    # ************
-
-    sql = "SELECT * FROM task WHERE tid ='%d'" % (tid)
-    rows = tools.selectOpt(sql)
-    if rows is None:
+    if not select_task_by_tid(tid):
         msg += "no this task"
         return 400, msg
-    p_sid = rows[0]['sid']
 
     sql = "SELECT * FROM task_order WHERE tid='%d' and sid='%s'" % (tid, sid)
     rows = tools.selectOpt(sql)
-    if rows is None:
+    if not rows:
         msg += "you haven't applied this task"
         return 400, msg
     elif rows[0]['accept_status'] == 1:
