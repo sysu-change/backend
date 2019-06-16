@@ -337,8 +337,8 @@ def task_verify():
 @app.route('/module/user/contact_receiver/<int:sid>', methods=['GET'])
 @login_required_mine
 def contact_receiver(sid):
-    name, sid, phone_num, email = contact_receiver_model(sid)
-    return python_object_to_json(name=name, sid=sid, phone_num=phone_num, email=email)
+    code, msg, content = contact_receiver_model(sid)
+    return python_object_to_json(code=code, msg=msg, content=content)
 
 
 if __name__ == '__main__':

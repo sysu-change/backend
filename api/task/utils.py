@@ -76,3 +76,21 @@ def compute_accept_num(tid):
     sql = "SELECT count(*) FROM task_order WHERE tid = %d" % (tid)
     rows = tools.selectOpt(sql)
     return rows[0]['count(*)']
+
+
+# 根据tid和sid判断任务是否在接单表
+def get_task_by_id(tid, sid):
+    sql = "SELECT * FROM task_order WHERE tid = %d AND sid = '%s'" % (tid, sid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return True
+    else:
+        return False
+
+
+# task 对应的quantity+1
+def increase_quantity_by_tid(tid):
+    sql = """UPDATE task SET quantity = quantity+1 WHERE tid = %d;""" % (
+       tid)
+    tools.modifyOpt(sql)
+

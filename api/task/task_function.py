@@ -415,16 +415,6 @@ def task_give_up_model(account):
 # used in module/user/delete_task
 def delete_task_model(account):
     # 蔡湘国
-    # 需要学生端接受任务，所以部分未测试
-
-    # ************
-    #  todo： 如果数据库中有人接单 并且我已经审批了  删除任务网页会崩溃
-    # ************
-
-    # ************
-    #  todo： 考虑好账户关系  我的任务单有一个人接了  但是我审核他失败 那么我删除任务应该退还我全款
-    # ************
-
     tid = account.get('tid', None)
     msg = ""
     # 对应参数为空的情况
@@ -452,8 +442,10 @@ def delete_task_model(account):
     add_balance_by_sid(session['sid'], return_monty)
     session['balance'] = session['balance'] + return_monty
     # 删除任务
-    sql = """DELETE FROM task WHERE tid="%d";""" % (tid)
+    sql = """DELETE FROM task_order WHERE tid="%d";""" % (tid)
     tools.modifyOpt(sql)
+    sql2 = """DELETE FROM task WHERE tid="%d";""" % (tid)
+    tools.modifyOpt(sql2)
 
     msg += "successful"
     return 200, msg
@@ -471,14 +463,6 @@ def task_verify_model(account):
     email = select_email_by_sid(sid)
     msg = ""
 
-    # ************
-    #  todo： 奶牛端审核失败的后果就是需求量重新 +1
-    # ************
-
-    # ************
-    #  todo： 一个不存在的接单 我拿来审核却告诉我审核成功
-    # ************
-
     # 判断各种异常情况
     # 对应参数为空的情况
     if tid == None or sid == None or verify == None:
@@ -487,6 +471,10 @@ def task_verify_model(account):
     # 数据库中查不到对应的任务id, 即任务不存在
     if not select_task_by_tid(tid):
         msg += "refused because of maybe_error_tid"
+        return 400, msg
+    # 接单表查不到对应任务
+    if not get_task_by_id(tid, sid):
+        msg += "can't find task in task_order"
         return 400, msg
     # 原来已经审核成功
     if get_verify_state_by_id(tid, sid) == 1:
@@ -504,6 +492,9 @@ def task_verify_model(account):
         sql = """UPDATE task_order SET reward_status=%d WHERE tid=%d AND sid="%s";""" % (
             1, tid, sid)
         tools.modifyOpt(sql)
+    # 审核不通过 quantity + 1回退
+    if verify == 2:
+        increase_quantity_by_tid(tid)
     msg += "successful"
     return 200, msg
 
@@ -511,19 +502,22 @@ def task_verify_model(account):
 # 奶牛端联系接单者（获取接单者部分用户信息）
 # used in module/user/contact_receiver/<int:sid>
 def contact_receiver_model(sid):
-
-    # ************
-    # todo：未注册的学号获取信息会网页崩溃
-    # ************
-
     # 蔡湘国
+    content = {}
+    msg = ""
     sql = "SELECT * FROM accounts WHERE sid='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         row = rows[0]
-        name = row['name']
-        sid = row['sid']
-        phone_num = row['phone_num']
-        email = row['email']
-    return name, sid, phone_num, email
+        content['name'] = row['name']
+        content['sid'] = row['sid']
+        content['phone_num'] = row['phone_num']
+        content['email'] = row['email']
+        code = 200
+        msg += "successful"
+        return code, msg, content
+    else:
+        code = 400
+        msg += "sid hasn't registered!"
+        return code, msg, content
 
