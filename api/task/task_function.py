@@ -138,15 +138,16 @@ def task_finish_model(account):
     return 200, msg
 
 
-# 奶牛端查看已完成的任务（注意是学生端标记任务完成，而不是奶牛端整个任务结束，奶牛端在学生标记任务完成之后还要进行审核）
+# 奶牛端查看已完成的任务
 # used in module/user/provider_task_done
 def provider_task_done_model():
     # 蔡湘国
     sid = session.get('sid')
     content = []
     msg = ""
-    sql = "(SELECT * FROM task t1,task_order t2 where " \
-          "t1.tid=t2.tid and t1.sid='%s' and accept_status=1)" % (sid)
+    sql = "SELECT * FROM task WHERE sid='%s' and status=1" % (sid)
+    # sql = "(SELECT * FROM task t1,task_order t2 where " \
+    #      "t1.tid=t2.tid and t1.sid='%s' and accept_status=1)" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
@@ -167,35 +168,15 @@ def provider_task_done_model():
     pass
 
 
-# 奶牛端查看正在进行中的任务（包括已接单但未完成，和发布中未被接单的任务）
+# 奶牛端查看正在进行中的任务
 # used in module/user/provider_task_in_progress
 def provider_task_in_progress_model():
-    # ************
-    #  todo： 一项任务 审批成功的人数 ==需求人数为任务完成  其他都是未完成  这里返还信息出错
-    # ************
-
     # 蔡湘国
     sid = session.get('sid')
     content = []
     msg = ""
-    # 已接单未完成
-    sql = "(SELECT * FROM task t1,task_order t2 where " \
-          "t1.tid=t2.tid and t1.sid='%s' and accept_status=0)" % (sid)
+    sql = "SELECT * FROM task WHERE sid='%s' and status=0" % (sid)
     rows = tools.selectOpt(sql)
-    if rows:
-        for i in range(len(rows)):
-            temp = {}
-            temp['tid'] = rows[i]['tid']
-            temp['type'] = rows[i]['type']
-            temp['deadline'] = rows[i]['deadline']
-            temp['reward'] = rows[i]['reward']
-            temp['quantity'] = rows[i]['quantity']
-            acc_num = compute_accept_num(rows[i]['tid'])
-            temp['accept_num'] = acc_num
-            content.append(temp)
-    # 已发布未被接单
-    sql2 = "(SELECT * FROM task t1 where (SELECT COUNT(1) FROM task_order t2 where t1.tid=t2.tid)=0 AND t1.sid='%s')" % (sid)
-    rows = tools.selectOpt(sql2)
     if rows:
         for i in range(len(rows)):
             temp = {}
@@ -495,6 +476,8 @@ def task_verify_model(account):
     # 审核不通过 quantity + 1回退
     if verify == 2:
         increase_quantity_by_tid(tid)
+    if get_quantity_by_tid(tid) == 0:
+        update_task_status(tid)
     msg += "successful"
     return 200, msg
 

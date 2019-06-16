@@ -94,3 +94,10 @@ def increase_quantity_by_tid(tid):
        tid)
     tools.modifyOpt(sql)
 
+
+# 更新task表对应任务status为已完成
+def update_task_status(tid):
+    sql = """UPDATE task SET status = 1 WHERE tid = %d;""" % (tid)
+    tools.modifyOpt(sql)
+
+
