@@ -34,9 +34,9 @@ def create_task_model(account):
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
         return 400, msg
-    if not isinstance(reward, float):
-        msg += "reward_must_be_float"
-        return 400, msg
+    # if not isinstance(reward, float):
+    #    msg += "reward_must_be_float"
+    #    return 400, msg
     cost = reward * quantity
     if cost > session['balance']:
         msg += "Insufficient_account_balance"
@@ -145,9 +145,9 @@ def provider_task_done_model():
     sid = session.get('sid')
     content = []
     msg = ""
-    sql = "SELECT * FROM task WHERE sid='%s' and status=1" % (sid)
-    # sql = "(SELECT * FROM task t1,task_order t2 where " \
-    #      "t1.tid=t2.tid and t1.sid='%s' and accept_status=1)" % (sid)
+    # sql = "SELECT * FROM task WHERE sid='%s' and status=1" % (sid)
+    sql = "(SELECT t1.tid, t1.type, t1.reward, t2.sid, t2.accept_status,t2.verify FROM task t1,task_order t2 where " \
+          "t1.tid=t2.tid and t1.sid='%s' and accept_status=1)" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
@@ -175,7 +175,7 @@ def provider_task_in_progress_model():
     sid = session.get('sid')
     content = []
     msg = ""
-    sql = "SELECT * FROM task WHERE sid='%s' and status=0" % (sid)
+    sql = "SELECT * FROM task WHERE sid='%s'" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(len(rows)):
@@ -416,10 +416,10 @@ def delete_task_model(account):
         return 400, msg
 
     # 返还剩下的钱
-    verify_num = get_verify_num_by_tid(tid)
+    # verify_num = get_verify_num_by_tid(tid)
     quantity = get_quantity_by_tid(tid)
     reward = get_reward_by_tid(tid)
-    return_monty = (quantity - verify_num) * reward
+    return_monty = quantity * reward
     add_balance_by_sid(session['sid'], return_monty)
     session['balance'] = session['balance'] + return_monty
     # 删除任务
