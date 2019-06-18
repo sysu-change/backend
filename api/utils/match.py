@@ -21,12 +21,14 @@ def match_password(password):
         return False
 
 
+# 匹配学号，可以考虑更加严格的学号验证
 def match_sid(sid):
     ret = re.match(r"^[0-9]{8}$", sid)
     if ret:
         return True
     else:
         return False
+
 
 # 为每个用户生成26位随机盐值，盐值用于密码加密
 # 每个用户创建时调用这个函数，并将盐值存于后端数据库

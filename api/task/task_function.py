@@ -488,15 +488,20 @@ def complaint_handle_model(account):
     verify = account.get('verify', None)
     msg =""
 
+    # 判断各种异常情况
+    # 对应参数为空的情况
     if cid == None or verify == None :
         msg += "Illegal_parameter"
         return 400, msg
+    # 错误的cid格式
     if not isinstance(cid, int):
         msg += "cid_must_be_int"
         return 400, msg
+    # 错误的cid编号，数据库中没有此cid
     if not select_comp_order_by_cid(cid):
         msg += "no this cid"
         return 400, msg
+    # cid已经被验证
     if not (get_verify_state_by_cid(cid) == 0):
         msg += "the cid has been verify"
         return 400, msg
@@ -504,10 +509,13 @@ def complaint_handle_model(account):
     sql = """UPDATE comp_order SET verify = %d WHERE cid = %d;""" % (verify, cid)
     tools.modifyOpt(sql)
 
+    # 发送邮件的相关逻辑
     tid, sid1, sid2 = select_tid_sid_by_cid(cid)
     email_of_sid1 = select_email_by_sid(sid1)
     email_of_sid2 = select_email_by_sid(sid2)
 
+    # 验证成功或者失败都将告知投诉者进展结果
+    # 审核成功将告知被投诉者惩罚结果，暂定惩罚为扣除12分信誉分
     if verify == 1:
         reduce_credibility_by_sid(sid2)
         sent_email_about_compliant(email_of_sid1, tid, sid2, 2)
@@ -520,6 +528,7 @@ def complaint_handle_model(account):
 
 
 # 获取所有未审核的投诉单
+# used in module/user/get_complaint/all
 def get_complaint_all_model():
     content = []
     msg = ""
@@ -546,10 +555,14 @@ def get_complaint_all_model():
 def get_complaint_model(cid):
     photo = []
     msg = ""
+
+    # 判断各种异常情况
+    # 数据库中存在的cid编号
     if not select_comp_order_by_cid(cid):
         msg += "no this cid"
         return 400, msg, 0, "", "", "", 0, photo
 
+    # 获取投诉信息，包括任务编号，投诉人，被投诉人，投诉理由
     sql = "SELECT * FROM comp_order WHERE cid = %d " % (cid)
     rows = tools.selectOpt(sql)
     if rows:
@@ -559,6 +572,7 @@ def get_complaint_model(cid):
         sid2 = rows_['sid2']
         reason = rows_['reason']
 
+    # 获取投诉照片
     sql = "SELECT img_data FROM img WHERE cid = %d " % (cid)
     rows = tools.selectOpt(sql)
     if rows:
@@ -570,11 +584,12 @@ def get_complaint_model(cid):
         number = len(photo)
         return 200, msg, tid, sid1, sid2, reason, number, photo
     else:
+        # 考虑没有照片的情况
         msg += "no photo"
         return 200, msg, tid, sid1, sid2, reason, 0, photo
 
 
-# 奶牛端和学生端投诉（发送邮件告知被投诉者）
+# 奶牛端和学生端投诉（暂时不告知用户了）
 # used in module/user/complaint
 def complaint_model(account):
     tid = account.get('tid', None)
@@ -582,19 +597,26 @@ def complaint_model(account):
     sid2 = account.get('sid2', None)
     reason = account.get('reason', None)
     msg = ""
+
+    # 判断各种异常情况
+    # 参数为空
     if sid1 == None or sid2 == None or reason == None or tid == None :
         msg += "Illegal_parameter"
         return 400, msg
+    # tid格式不正确
     if not isinstance(tid, int):
         msg += "tid_must_be_int"
         return 400, msg
+    # 数据库中不存在的任务编号
     if not select_task_by_tid(tid):
         msg += "no this task"
         return 400, msg
+    # 登陆账号与投诉人不一致
     if not session['sid'] == sid1:
         msg += "The complainant must be your sid"
         return 400, msg
 
+    # 判断cid是否已经存在，如果不存在就建立新的词条，存在的话就更新词条
     cid = get_cid_by(tid, sid1, sid2)
 
     if cid == 0:
@@ -611,18 +633,24 @@ def complaint_model(account):
 
 
 # 上传图片
+# used in module/picture/upload
 def upload_picture_model(account):
     tid = account.get('tid', None)
     sid1 = account.get('sid1', None)
     sid2 = account.get('sid2', None)
     file = account.get('photo', None)
     msg = ""
+
+    # 判断各种异常情况
+    # 参数为空
     if sid1 == None or sid2 == None or tid == None :
         msg += "Illegal_parameter"
         return 400, msg
+    # 错误的tid格式
     if not isinstance(tid, int):
         msg += "tid_must_be_int"
         return 400, msg
+    # 数据库中不存在的tid编号
     if not select_task_by_tid(tid):
         msg += "no this task"
         return 400, msg
@@ -630,6 +658,7 @@ def upload_picture_model(account):
         msg += "The complainant must be your sid"
         return 400, msg
 
+    # 根据tid，sid1，sid2判断cid词条是否存在，不存在就建立词条，存在就不建立词条
     cid = get_cid_by(tid, sid1, sid2)
 
     if cid == 0:

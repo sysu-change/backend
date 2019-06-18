@@ -117,6 +117,9 @@ def sent_email_to_task_publisher(to, tid, content_num):
     # content_num == 3 ,提示任务发布者对方取消任务，注意任务状态
     if content_num == 3:
         content = '任务状态提醒：您在闲钱宝关于任务ID为' + str(tid) + '的任务对方已经取消了任务，您的任务状态重新变更为发布中，请注意！详细情况登陆闲钱宝查看'
+    # content_num == 4 ,注册时发送邮箱验证码
+    if content_num == 4:
+        content = '验证码提醒：您在闲钱宝的4位注册验证码为 ' + str(tid) + ' 请填写正确的验证码以验证邮箱！详细情况登陆闲钱宝查看！'
     # 接下去有什么要回复的内容记得在这里添加
 
     msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content ])

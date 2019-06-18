@@ -114,6 +114,13 @@ def user_withdraw():
     return python_object_to_json(code=code, msg=msg)
 
 
+# 发送邮箱验证码
+@app.route('/module/user/sent_verify', methods=['POST'])
+def user_sent_verify():
+    code, msg, verify_code = user_sent_verify_model(request.json)
+    return python_object_to_json(code=code, msg=msg, verify_code=verify_code)
+
+
 """
 问卷接口
 """
@@ -314,6 +321,11 @@ def task_verify():
 def contact_receiver(sid):
     code, msg, content = contact_receiver_model(sid)
     return python_object_to_json(code=code, msg=msg, content=content)
+
+
+"""
+投诉逻辑接口
+"""
 
 
 # 奶牛端和学生端投诉（发送邮件给投诉人，告知受理）

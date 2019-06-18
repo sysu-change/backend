@@ -181,3 +181,17 @@ def user_withdraw_model(account):
     session['balance'] = session['balance'] - money
     return 200, msg
 
+
+# 用户邮箱验证
+# used in /module/user/sent_verify
+def user_sent_verify_model(account):
+    email = account.get('email')
+    msg = ""
+
+    if email == None :
+        msg += "Illegal_parameter"
+        return 400, msg, ""
+    code = random_code(4)
+    sent_email_to_task_publisher(email, code, 4)
+    msg += "successful"
+    return 200, msg, code
