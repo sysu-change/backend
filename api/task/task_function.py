@@ -328,30 +328,6 @@ def select_task_model(account):
         return 200, msg, 0, content
 
 
-# 审核投诉单
-# used in module/user/complaint_handle
-def complaint_handle_model(account):
-    # todo
-    # 唐育涛
-    pass
-
-
-# 查看投诉单
-# used in module/user/get_complaint/<int:cid>
-def get_complaint_model(cid):
-    # todo
-    # 唐育涛
-    pass
-
-
-# 奶牛端和学生端投诉（发送邮件告知被投诉者）
-# used in module/user/complaint
-def complaint_model(account):
-    # todo
-    # 唐育涛
-    pass
-
-
 # 学生端放弃任务（需求量回退一步,邮件告知任务发起者 ）
 # used in module/user/task_give_up
 def task_give_up_model(account):
@@ -503,4 +479,170 @@ def contact_receiver_model(sid):
         code = 400
         msg += "sid hasn't registered!"
         return code, msg, content
+
+
+# 审核投诉单
+# used in module/user/complaint_handle
+def complaint_handle_model(account):
+    cid = account.get('cid', None)
+    verify = account.get('verify', None)
+    msg =""
+
+    if cid == None or verify == None :
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(cid, int):
+        msg += "cid_must_be_int"
+        return 400, msg
+    if not select_comp_order_by_cid(cid):
+        msg += "no this cid"
+        return 400, msg
+    if not (get_verify_state_by_cid(cid) == 0):
+        msg += "the cid has been verify"
+        return 400, msg
+
+    sql = """UPDATE comp_order SET verify = %d WHERE cid = %d;""" % (verify, cid)
+    tools.modifyOpt(sql)
+
+    tid, sid1, sid2 = select_tid_sid_by_cid(cid)
+    email_of_sid1 = select_email_by_sid(sid1)
+    email_of_sid2 = select_email_by_sid(sid2)
+
+    if verify == 1:
+        reduce_credibility_by_sid(sid2)
+        sent_email_about_compliant(email_of_sid1, tid, sid2, 2)
+        sent_email_about_compliant(email_of_sid2, tid, sid1, 4)
+    else:
+        sent_email_about_compliant(email_of_sid1, tid, sid2, 3)
+
+    msg += "successful"
+    return 200, msg
+
+
+# 获取所有未审核的投诉单
+def get_complaint_all_model():
+    content = []
+    msg = ""
+    sql = "SELECT cid, tid, sid1, sid2 FROM comp_order WHERE verify = 0"
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['cid'] = rows[i]['cid']
+            temp['tid'] = rows[i]['tid']
+            temp['sid1'] = rows[i]['sid1']
+            temp['sid2'] = rows[i]['sid2']
+            content.append(temp)
+        msg += "successful"
+        number = len(content)
+        return 200, msg, number, content
+    else:
+        msg += "no record"
+        return 200, msg, 0, content
+
+
+# 查看具体投诉单
+# used in module/user/get_complaint/<int:cid>
+def get_complaint_model(cid):
+    photo = []
+    msg = ""
+    if not select_comp_order_by_cid(cid):
+        msg += "no this cid"
+        return 400, msg, 0, "", "", "", 0, photo
+
+    sql = "SELECT * FROM comp_order WHERE cid = %d " % (cid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        tid = rows_['tid']
+        sid1 = rows_['sid1']
+        sid2 = rows_['sid2']
+        reason = rows_['reason']
+
+    sql = "SELECT img_data FROM img WHERE cid = %d " % (cid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        for i in range(len(rows)):
+            temp = {}
+            temp['photo'+str(i)] = rows[i]['img_data']
+            photo.append(temp)
+        msg += "successful"
+        number = len(photo)
+        return 200, msg, tid, sid1, sid2, reason, number, photo
+    else:
+        msg += "no photo"
+        return 200, msg, tid, sid1, sid2, reason, 0, photo
+
+
+# 奶牛端和学生端投诉（发送邮件告知被投诉者）
+# used in module/user/complaint
+def complaint_model(account):
+    tid = account.get('tid', None)
+    sid1 = account.get('sid1', None)
+    sid2 = account.get('sid2', None)
+    reason = account.get('reason', None)
+    msg = ""
+    if sid1 == None or sid2 == None or reason == None or tid == None :
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(tid, int):
+        msg += "tid_must_be_int"
+        return 400, msg
+    if not select_task_by_tid(tid):
+        msg += "no this task"
+        return 400, msg
+    if not session['sid'] == sid1:
+        msg += "The complainant must be your sid"
+        return 400, msg
+
+    cid = get_cid_by(tid, sid1, sid2)
+
+    if cid == 0:
+        sql = """INSERT INTO comp_order(tid, sid1, sid2, reason, verify)
+                        VALUES ("%d", "%s", "%s", "%s","%d");""" % (
+                        tid, sid1, sid2, reason, 0)
+        tools.modifyOpt(sql)
+    else:
+        sql = """UPDATE comp_order SET reason = "%s"WHERE cid = "%s";""" % (
+            reason, cid)
+        tools.modifyOpt(sql)
+    msg += "successful"
+    return 200, msg
+
+
+# 上传图片
+def upload_picture_model(account):
+    tid = account.get('tid', None)
+    sid1 = account.get('sid1', None)
+    sid2 = account.get('sid2', None)
+    file = account.get('photo', None)
+    msg = ""
+    if sid1 == None or sid2 == None or tid == None :
+        msg += "Illegal_parameter"
+        return 400, msg
+    if not isinstance(tid, int):
+        msg += "tid_must_be_int"
+        return 400, msg
+    if not select_task_by_tid(tid):
+        msg += "no this task"
+        return 400, msg
+    if not session['sid'] == sid1:
+        msg += "The complainant must be your sid"
+        return 400, msg
+
+    cid = get_cid_by(tid, sid1, sid2)
+
+    if cid == 0:
+        sql = """INSERT INTO comp_order(tid, sid1, sid2, reason, verify)
+                                VALUES (%d, "%s", "%s", "%s","%d");""" % (
+            tid, sid1, sid2, "", 0)
+        tools.modifyOpt(sql)
+        cid = get_cid_by(tid, sid1, sid2)
+
+    sql = """INSERT INTO img(cid,img_data)
+                            VALUES (%d,"%s");""" % (cid, file)
+    tools.modifyOpt(sql)
+    msg += "successful"
+    return 200, msg
+
 

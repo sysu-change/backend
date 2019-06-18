@@ -171,4 +171,51 @@ def sent_email_to_task_receiver(to, tid, content_num):
     return True
 
 
+# 这个方法是投诉相关逻辑，投诉以及超级管理员审核都用这一个方法，需要添加内容就改一下content
+# 投诉受理给投诉发起人发消息，投诉成功给投诉人和被投诉人发消息，投诉失败给投诉人发消息
+# to 表示收件方邮件地址 可以是qq邮箱 163邮箱 126邮箱 等等各类邮箱
+# qid 表示任务的内容的编号
+# content_num 表示要发给用户的内容的选择
+def sent_email_about_compliant(to, tid, sid, content_num):
+    # QQ邮件
+    # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
+    host = 'smtp.qq.com'
+    # # 2> 配置服务的端口，默认的邮件端口是25.
+    port = '465'
+    # # 3> 指定发件人和收件人。
+    from_email = '1542193293@qq.com'
+    # # 4> 邮件标题
+    subject = '闲钱宝 任务信息提醒'
+    # # 5> 邮件内容
+    content = ''
+    # # 创建邮件发送对象
+    # # 普通的邮件发送形式
+    # # 数据在传输过程中会被加密。
+    stmp_obj = smtplib.SMTP_SSL(host=host)
 
+    # # 需要进行发件人的认证，授权。
+    # # stmp_obj就是一个第三方客户端对象
+    stmp_obj.connect(host=host, port=port)
+
+    # # 如果使用第三方客户端登录，要求使用授权码，不能使用真实密码，防止密码泄露。
+    res = stmp_obj.login(user=from_email, password='gyvkglxdytfcjdbe')
+    if not res:
+        return False
+
+    # content_num == 1 ,提示投诉已经受理
+    if content_num == 1:
+        content = '投诉受理！您在闲钱宝上关于任务ID为' + str(tid) + '的任务发起了对' + str(sid) + '的投诉，投诉已经受理，我们会在24小时内完成审核，敬请留意相关消息！'
+    # content_num == 2 ,投诉成功
+    if content_num == 2:
+        content = '投诉成功！您在闲钱宝上关于任务ID为' + str(tid) + '的任务发起了对' + str(sid) + '的投诉，投诉审核成功，系统对被投诉者做出了扣除12点信誉积分的惩罚！'
+    # content_num == 3 ,投诉失败
+    if content_num == 3:
+        content = '投诉失败！您在闲钱宝上关于任务ID为' + str(tid) + '的任务发起了对' + str(sid) + '的投诉，投诉缺乏相关证据，审核不予以通过，请提交更多的相关信息！'
+    # content_num == 4 ,被投诉成功
+    if content_num == 4:
+        content = '投诉告知！您在闲钱宝上关于任务ID为' + str(tid) + '的任务受到了' + str(sid) + '的投诉，投诉审核通过，对您做出了扣除12点信誉积分的处罚！请注意任务规范！'
+    # 接下去有什么要回复的内容记得在这里添加
+
+    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content])
+    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
+    return True

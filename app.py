@@ -284,31 +284,6 @@ def select_task():
     return python_object_to_json(code=code, msg=msg, number=number, content=content)
 
 
-# 审核投诉单
-@app.route('/module/user/complaint_handle', methods=['PUT'])
-@login_required_mine
-def complaint_handle():
-    code, msg = complaint_handle_model(request)
-    return python_object_to_json(code=code, msg=msg)
-
-
-# 查看投诉单
-@app.route('/module/user/get_complaint/<int:cid>', methods=['GET'])
-@login_required_mine
-def get_complaint(cid):
-    code, msg, tid, sid1, sid2, reason, photo = get_complaint_model(cid)
-    return python_object_to_json(code=code, msg=msg, tid=tid, sid1=sid1,
-                                 sid2=sid2, reason=reason, photo=photo)
-
-
-# 奶牛端和学生端投诉（发送邮件告知被投诉者）
-@app.route('/module/user/complaint', methods=['POST'])
-@login_required_mine
-def complaint():
-    code, msg = complaint_model(request.json)
-    return python_object_to_json(code=code, msg=msg)
-
-
 # 学生端放弃任务（需求量回退一步,邮件告知任务发起者 ）
 @app.route('/module/user/task_give_up', methods=['POST'])
 @login_required_mine
@@ -339,6 +314,47 @@ def task_verify():
 def contact_receiver(sid):
     code, msg, content = contact_receiver_model(sid)
     return python_object_to_json(code=code, msg=msg, content=content)
+
+
+# 奶牛端和学生端投诉（发送邮件给投诉人，告知受理）
+@app.route('/module/user/complaint', methods=['POST'])
+@login_required_mine
+def complaint():
+    code, msg = complaint_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
+# 审核投诉单
+@app.route('/module/user/complaint_handle', methods=['PUT'])
+@login_required_mine
+def complaint_handle():
+    code, msg = complaint_handle_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
+
+
+# 获取所有未审核的投诉单
+@app.route('/module/user/get_complaint/all', methods=['GET'])
+@login_required_mine
+def get_complaint_all():
+    code, msg, number, content = get_complaint_all_model()
+    return python_object_to_json(code=code, msg=msg, number=number, content=content)
+
+
+# 查看具体投诉单
+@app.route('/module/user/get_complaint/<int:cid>', methods=['GET'])
+@login_required_mine
+def get_complaint(cid):
+    code, msg, tid, sid1, sid2, reason, number, photo = get_complaint_model(cid)
+    return python_object_to_json(code=code, msg=msg, tid=tid, sid1=sid1,
+                                 sid2=sid2, reason=reason, number=number, photo=photo)
+
+
+# 投诉单上传图片
+@app.route('/module/picture/upload', methods=['POST'])
+@login_required_mine
+def upload_picture():
+    code, msg = upload_picture_model(request.json)
+    return python_object_to_json(code=code, msg=msg)
 
 
 if __name__ == '__main__':

@@ -128,3 +128,10 @@ def select_email_by_sid(sid):
         return rows_['email']
     else:
         return "can't find correspond email!"
+
+
+# 根据学号扣除信誉分
+def reduce_credibility_by_sid(sid):
+    sql = """UPDATE accounts SET Credibility = Credibility - "%s"WHERE sid = "%s";""" % (
+        12, sid)
+    tools.modifyOpt(sql)

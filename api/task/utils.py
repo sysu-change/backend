@@ -101,3 +101,39 @@ def update_task_status(tid):
     tools.modifyOpt(sql)
 
 
+def get_cid_by(tid, sid1, sid2):
+    sql = "SELECT * FROM comp_order WHERE tid = %d AND sid1 = '%s'AND sid2 = '%s'" % (tid, sid1, sid2)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return rows[0]['cid']
+    else:
+        return 0
+
+
+def select_comp_order_by_cid(cid):
+    sql = "SELECT * FROM comp_order WHERE cid = %d " % (cid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        return True
+    else:
+        return False
+
+
+def select_tid_sid_by_cid(cid):
+    sql = "SELECT tid, sid1,sid2 FROM comp_order WHERE cid = %d " % (cid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        return rows_['tid'], rows_['sid1'], rows_['sid2']
+    else:
+        return "", "", ""
+
+
+def get_verify_state_by_cid(cid):
+    sql = "SELECT verify FROM comp_order WHERE cid = %d " % (cid)
+    rows = tools.selectOpt(sql)
+    if rows:
+        rows_ = rows[0]
+        return rows_['verify']
+    else:
+        return 0
