@@ -185,7 +185,7 @@ def user_withdraw_model(account):
 # 用户邮箱验证
 # used in /module/user/sent_verify
 def user_sent_verify_model(account):
-    email = account.get('email')
+    email = account.get('email', None)
     msg = ""
 
     if email == None :
