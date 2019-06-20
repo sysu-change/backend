@@ -79,6 +79,7 @@ def userinfo():
     age = session.get('age')
     major = session.get('major')
     grade = session.get('grade')
+    grade = grade_trans_to_int(grade)
     sex = session.get('sex')
     phone_num = session.get('phone_num')
     email = session.get('email')

@@ -25,3 +25,20 @@ def grade_trans(grade):
         return u'研三'
     return u'未知'
 
+
+def grade_trans_to_int(grade):
+    if grade == u'大一':
+        return 1
+    if grade == u'大二':
+        return 2
+    if grade == u'大三':
+        return 3
+    if grade == u'大四':
+        return 4
+    if grade == u'研一':
+        return 5
+    if grade == u'研二':
+        return 6
+    if grade == u'研三':
+        return 7
+    return 0
