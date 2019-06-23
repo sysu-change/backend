@@ -71,8 +71,8 @@ def register_account(account):
     salt = random_code(26)
     password = hash_password(password, salt)
     msg = ""
-    if sid == None or name == None or age == None or grade == None or major == None\
-            or phone_num==None or email==None or password==None or (not isinstance(age, int)):
+    if sid is None or name is None or age is None or grade is None or major is None\
+            or phone_num is None or email is None or password is None or (not isinstance(age, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not match_sid(sid):
@@ -110,7 +110,7 @@ def edit_userinfo_model(account):
     major = account.get('major', None)
     email = account.get('email', None)
     msg = ""
-    if  name == None or age == None or grade == None or major == None or sex ==None or email == None \
+    if name is None or age is None or grade is None or major is None or sex is None or email is None \
              or (not isinstance(age, int)) or (not isinstance(sex, int)) or (not isinstance(grade, int)):
         msg += "Illegal_parameter"
         return 400, msg
@@ -159,7 +159,7 @@ def user_withdraw_model(account):
     password = account.get('password', None)
     money = account.get('money', None)
     msg = ""
-    if pay_phone == None or password == None or (not isinstance(money, int)):
+    if pay_phone is None or password is None or (not isinstance(money, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not match_phone(pay_phone):
@@ -188,7 +188,7 @@ def user_sent_verify_model(account):
     email = account.get('email', None)
     msg = ""
 
-    if email == None :
+    if email is None :
         msg += "Illegal_parameter"
         return 400, msg, ""
     code = random_code(4)

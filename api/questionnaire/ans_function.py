@@ -67,7 +67,7 @@ def answer_review_model(account):
     msg = ""
     # 判断各种异常情况
     # 对应参数为空的情况
-    if qid == None or sid == None or verify == None :
+    if qid is None or sid is None or verify is None :
         msg += "refused because of Illegal_parameter"
         return 400, msg
     # 数据库中查不到对应的问卷id, 即问卷不存在

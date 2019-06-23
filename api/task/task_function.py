@@ -204,7 +204,7 @@ def task_model(id):
     tid = id
     msg = ""
     # 对应参数为空的情况
-    if id == None:
+    if id is None:
         msg += "id can't be empty"
         return 400, msg, []
     # 数据库中查不到对应的任务tid, 即任务不存在
@@ -375,7 +375,7 @@ def delete_task_model(account):
     tid = account.get('tid', None)
     msg = ""
     # 对应参数为空的情况
-    if tid == None:
+    if tid is None:
         msg += "tid can't be empty"
         return 400, msg
     # 数据库中查不到对应的任务tid, 即任务不存在
@@ -422,7 +422,7 @@ def task_verify_model(account):
 
     # 判断各种异常情况
     # 对应参数为空的情况
-    if tid == None or sid == None or verify == None:
+    if tid is None or sid is None or verify is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg
     # 数据库中查不到对应的任务id, 即任务不存在
@@ -486,11 +486,11 @@ def contact_receiver_model(sid):
 def complaint_handle_model(account):
     cid = account.get('cid', None)
     verify = account.get('verify', None)
-    msg =""
+    msg = ""
 
     # 判断各种异常情况
     # 对应参数为空的情况
-    if cid == None or verify == None :
+    if cid is None or verify is None :
         msg += "Illegal_parameter"
         return 400, msg
     # 错误的cid格式
@@ -600,7 +600,7 @@ def complaint_model(account):
 
     # 判断各种异常情况
     # 参数为空
-    if sid1 == None or sid2 == None or reason == None or tid == None :
+    if sid1 is None or sid2 is None or reason is None or tid is None :
         msg += "Illegal_parameter"
         return 400, msg
     # tid格式不正确
@@ -643,7 +643,7 @@ def upload_picture_model(account):
 
     # 判断各种异常情况
     # 参数为空
-    if sid1 == None or sid2 == None or tid == None :
+    if sid1 is None or sid2 is None or tid is None :
         msg += "Illegal_parameter"
         return 400, msg
     # 错误的tid格式

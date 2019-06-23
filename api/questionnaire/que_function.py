@@ -63,8 +63,8 @@ def edit_questionnaire_model(account):
     pub_time = account.get('pub_time', None)
     content = account.get('content', None)
     msg = ""
-    if sid == None or title == None or description== None or edit_status == None or pub_time==None\
-        or reward == None or quantity == None or content== None or (not isinstance(edit_status, int)):
+    if sid is None or title is None or description is None or edit_status is None or pub_time is None\
+        or reward is None or quantity is None or content is None or (not isinstance(edit_status, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not isinstance(quantity, int):
@@ -101,7 +101,7 @@ def delete_questionnaire_model(account):
     qid = account.get('qid', None)
     msg = ""
     # 对应参数为空的情况
-    if qid == None:
+    if qid is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg
     # 数据库中查不到对应的问卷id, 即问卷不存在
@@ -171,7 +171,7 @@ def questionnaire_spec_model(qid):
     qid = qid
     msg = ""
     # 对应参数为空的情况
-    if qid == None:
+    if qid is None:
         msg += "refused because of Illegal_parameter"
         return 400, msg, []
     # 数据库中查不到对应的问卷id, 即问卷不存在
