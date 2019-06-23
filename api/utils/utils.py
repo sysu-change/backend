@@ -43,13 +43,13 @@ def login_required_mine(func):
 # 这个方法只跟问卷有关
 # 答卷审核发送邮件
 def sent_email_answer_message(to, qid, verify):
-    # QQ邮件
+    # 163邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
-    host = 'smtp.qq.com'
+    host = 'smtp.163.com'
     # # 2> 配置服务的端口，默认的邮件端口是25.
-    port = '465'
+    port = '25'
     # # 3> 指定发件人和收件人。
-    from_email = '1542193293@qq.com'
+    from_email = 'xifen321@163.com'
     # # 4> 邮件标题
     subject = '闲钱宝 问卷审核信息'
     # # 5> 邮件内容
@@ -57,15 +57,17 @@ def sent_email_answer_message(to, qid, verify):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL(host=host)
-    # stmp_obj = smtplib.SMTP_SSL()
+    # # qq邮箱则需要加密 采用465端口
+    # # stmp_obj = smtplib.SMTP_SSL(host=host)
+    # # stmp_obj = smtplib.SMTP_SSL()
+    stmp_obj = smtplib.SMTP()
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
     stmp_obj.connect(host=host, port=port)
 
     # # 如果使用第三方客户端登录，要求使用授权码，不能使用真实密码，防止密码泄露。
-    res = stmp_obj.login(user=from_email, password='gyvkglxdytfcjdbe')
+    res = stmp_obj.login(user=from_email, password='qq1415629749')
     if not res:
         return False
     if verify == 1:
@@ -83,13 +85,13 @@ def sent_email_answer_message(to, qid, verify):
 # qid 表示任务的内容的编号
 # content_num 表示要发给用户的内容的选择
 def sent_email_to_task_publisher(to, tid, content_num):
-    # QQ邮件
+    # 163邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
-    host = 'smtp.qq.com'
+    host = 'smtp.163.com'
     # # 2> 配置服务的端口，默认的邮件端口是25.
-    port = '465'
+    port = '25'
     # # 3> 指定发件人和收件人。
-    from_email = '1542193293@qq.com'
+    from_email = 'xifen321@163.com'
     # # 4> 邮件标题
     subject = '闲钱宝 任务信息提醒'
     # # 5> 邮件内容
@@ -97,14 +99,15 @@ def sent_email_to_task_publisher(to, tid, content_num):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL(host=host)
+    # # stmp_obj = smtplib.SMTP_SSL(host=host)
+    stmp_obj = smtplib.SMTP()
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
     stmp_obj.connect(host=host, port=port)
-
     # # 如果使用第三方客户端登录，要求使用授权码，不能使用真实密码，防止密码泄露。
-    res = stmp_obj.login(user=from_email, password='gyvkglxdytfcjdbe')
+    res = stmp_obj.login(user=from_email, password='qq1415629749')
+
     if not res:
         return False
 
@@ -133,13 +136,13 @@ def sent_email_to_task_publisher(to, tid, content_num):
 # qid 表示任务的内容的编号
 # content_num 表示要发给用户的内容的选择
 def sent_email_to_task_receiver(to, tid, content_num):
-    # QQ邮件
+    # 163邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
-    host = 'smtp.qq.com'
+    host = 'smtp.163.com'
     # # 2> 配置服务的端口，默认的邮件端口是25.
-    port = '465'
+    port = '25'
     # # 3> 指定发件人和收件人。
-    from_email = '1542193293@qq.com'
+    from_email = 'xifen321@163.com'
     # # 4> 邮件标题
     subject = '闲钱宝 任务信息提醒'
     # # 5> 邮件内容
@@ -147,14 +150,15 @@ def sent_email_to_task_receiver(to, tid, content_num):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL(host=host)
+    # # stmp_obj = smtplib.SMTP_SSL(host=host)
+    stmp_obj = smtplib.SMTP()
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
     stmp_obj.connect(host=host, port=port)
 
     # # 如果使用第三方客户端登录，要求使用授权码，不能使用真实密码，防止密码泄露。
-    res = stmp_obj.login(user=from_email, password='gyvkglxdytfcjdbe')
+    res = stmp_obj.login(user=from_email, password='qq1415629749')
     if not res:
         return False
 
@@ -180,13 +184,13 @@ def sent_email_to_task_receiver(to, tid, content_num):
 # qid 表示任务的内容的编号
 # content_num 表示要发给用户的内容的选择
 def sent_email_about_compliant(to, tid, sid, content_num):
-    # QQ邮件
+    # 163邮件
     # 1> 配置邮箱SMTP服务器的主机地址，将来使用这个服务器收发邮件。
-    host = 'smtp.qq.com'
+    host = 'smtp.163.com'
     # # 2> 配置服务的端口，默认的邮件端口是25.
-    port = '465'
+    port = '25'
     # # 3> 指定发件人和收件人。
-    from_email = '1542193293@qq.com'
+    from_email = 'xifen321@163.com'
     # # 4> 邮件标题
     subject = '闲钱宝 任务信息提醒'
     # # 5> 邮件内容
@@ -194,14 +198,14 @@ def sent_email_about_compliant(to, tid, sid, content_num):
     # # 创建邮件发送对象
     # # 普通的邮件发送形式
     # # 数据在传输过程中会被加密。
-    stmp_obj = smtplib.SMTP_SSL(host=host)
+    # # stmp_obj = smtplib.SMTP_SSL(host=host)
+    stmp_obj = smtplib.SMTP()
 
     # # 需要进行发件人的认证，授权。
     # # stmp_obj就是一个第三方客户端对象
     stmp_obj.connect(host=host, port=port)
-
     # # 如果使用第三方客户端登录，要求使用授权码，不能使用真实密码，防止密码泄露。
-    res = stmp_obj.login(user=from_email, password='gyvkglxdytfcjdbe')
+    res = stmp_obj.login(user=from_email, password='qq1415629749')
     if not res:
         return False
 
