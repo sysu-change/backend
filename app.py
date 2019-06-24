@@ -370,6 +370,12 @@ def upload_picture():
     return python_object_to_json(code=code, msg=msg)
 
 
+# 测试docker后端部署
+@app.route('/')
+def test_docker():
+    return 'Hi!Welcome to our earn_money app!'
+
+
 if __name__ == '__main__':
     CORS(app, supports_credentials=True)
     app.run(host='localhost', port=8082, debug=True)
