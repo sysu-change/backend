@@ -1,11 +1,7 @@
 ## Dockerfile that generates an instance of www.earn_money.com
-FROM ubuntu:16.04
+FROM python:3.7-alpine
 LABEL maintainer="earn_money"
-ENV LANG C
-
-RUN apt-get update \
-  && apt-get install -y python3-pip python3-dev locales\
-  && pip3 install --upgrade pip
+ENV LANG C.UTF-8d
 
 COPY . /app
 WORKDIR /app
