@@ -24,15 +24,27 @@ def create_questionnaire_model(account):
     msg = ""
     if sid is None or title is None or description is None or edit_status is None or \
             pub_time is None or reward is None or quantity is None or \
-            content is None or (not isinstance(edit_status, int)):
+            content is None or (not isinstance(edit_status, int)) or (not isinstance(quantity, int)):
         msg += "Illegal_parameter"
         return 400, msg
     #if not isinstance(quantity, int):
     #    msg += "quantity_must_be_int"
     #    return 400, msg
-    if not isinstance(reward, float):
-        msg += "reward_must_be_float"
+
+    if quantity <= 0 :
+        msg += "quantity_must_larger_than_0"
         return 400, msg
+
+    if isinstance(reward, int):
+        reward = float(reward)
+
+    if not isinstance(reward, float):
+        msg += "reward_must_be_float_or_int"
+        return 400, msg
+    if reward <= 0:
+        msg += "reward_must_larger_than_0"
+        return 400, msg
+
     if edit_status == 1:
         cost = reward * quantity
         if cost > session['balance']:
@@ -198,6 +210,7 @@ def questionnaire_spec_model(qid):
 def questionnaire_pre_model(request):
     offset = request.args.get("offset")
     number = request.args.get("number")
+    sid = session.get('sid')
 
     content = []
     msg = ""
@@ -210,7 +223,9 @@ def questionnaire_pre_model(request):
     offset = int(offset)
     number = int(number)
 
-    sql = "SELECT * FROM questiontable where edit_status = 1"
+    sql = "SELECT *, (select count(*) from answertable where qid = questiontable.qid) as ans_c " \
+          "FROM questiontable where edit_status = 1 " \
+          "and (select count(*) from answertable where qid = questiontable.qid and sid = '%s')=0" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(offset, min(len(rows), offset+number)):
@@ -219,7 +234,7 @@ def questionnaire_pre_model(request):
             temp['title'] = rows[i]['title']
             temp['description'] = rows[i]['description']
             temp['edit_status'] = rows[i]['edit_status']
-            temp['quantity'] = rows[i]['quantity']
+            temp['quantity'] = rows[i]['quantity'] - rows[i]['ans_c']
             temp['reward'] = rows[i]['reward']
             content.append(temp)
         msg += "successful"

@@ -78,6 +78,7 @@ class dbTools:
         results = dbp_opt.opSelect(sql)
         dbp_opt.dispose()  # 释放连接
         return results
+
     def modifyOpt(self, sql):  # insert \ update \ delete
         """ Modify operator for db connection pool.
         Args:

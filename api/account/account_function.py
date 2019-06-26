@@ -188,7 +188,7 @@ def user_sent_verify_model(account):
     email = account.get('email', None)
     msg = ""
 
-    if email is None :
+    if email is None:
         msg += "Illegal_parameter"
         return 400, msg, ""
     code = random_code(4)

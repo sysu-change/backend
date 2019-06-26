@@ -74,8 +74,8 @@ def sent_email_answer_message(to, qid, verify):
         content = '恭喜您，您在闲钱宝关于问卷编号为'+ str(qid) + '的回答已经通过审核，问卷赏金已经存进您的账户'
     if verify == 0:
         content = '非常遗憾，您在闲钱宝关于问卷编号为' + str(qid) + '的回答未能通过审核，请注意规范答题！'
-    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content ])
-    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
+    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to+','+from_email), 'Subject: {}'.format(subject), '', content ])
+    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to, from_email], msg=msg.encode('utf-8'))
     return True
 
 
@@ -125,8 +125,8 @@ def sent_email_to_task_publisher(to, tid, content_num):
         content = '验证码提醒：您在闲钱宝的4位注册验证码为 ' + str(tid) + ' 请填写正确的验证码以验证邮箱！详细情况登陆闲钱宝查看！'
     # 接下去有什么要回复的内容记得在这里添加
 
-    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content ])
-    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
+    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to+','+from_email), 'Subject: {}'.format(subject), '', content])
+    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to, from_email], msg=msg.encode('utf-8'))
     return True
 
 
@@ -173,8 +173,8 @@ def sent_email_to_task_receiver(to, tid, content_num):
         content = '非常抱歉！您在闲钱宝关于任务ID为' + str(tid) + '的任务未能通过审核，可以联系任务发布者解释原因，有其他不满可以进行投诉！详细情况登陆闲钱宝查看'
     # 接下去有什么要回复的内容记得在这里添加
 
-    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content])
-    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
+    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to+','+from_email), 'Subject: {}'.format(subject), '', content])
+    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to, from_email], msg=msg.encode('utf-8'))
     return True
 
 
@@ -223,6 +223,6 @@ def sent_email_about_compliant(to, tid, sid, content_num):
         content = '投诉告知！您在闲钱宝上关于任务ID为' + str(tid) + '的任务受到了' + str(sid) + '的投诉，投诉审核通过，对您做出了扣除12点信誉积分的处罚！请注意任务规范！'
     # 接下去有什么要回复的内容记得在这里添加
 
-    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to), 'Subject: {}'.format(subject), '', content])
-    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to], msg=msg.encode('utf-8'))
+    msg = '\n'.join(['From: {}'.format(from_email), 'To: {}'.format(to+','+from_email), 'Subject: {}'.format(subject), '', content])
+    stmp_obj.sendmail(from_addr=from_email, to_addrs=[to, from_email], msg=msg.encode('utf-8'))
     return True

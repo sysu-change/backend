@@ -6,6 +6,7 @@ import io
 import sys
 from flask import current_app, session
 import json
+import datetime
 
 from api import *
 from .utils import *
@@ -16,7 +17,7 @@ from .utils import *
 def create_task_model(account):
     # 蔡湘国
     sid = session.get('sid')
-    type = account.get('type', None)
+    type_ = account.get('type', None)
     description = account.get('description', None)
     detail = account.get('detail', None)
     deadline = account.get('deadline', None)
@@ -28,11 +29,37 @@ def create_task_model(account):
     msg = ""
     if sid is None or type is None or description is None or detail is None or \
             deadline is None or phone_num is None or wechat is None or \
-            quantity is None or reward is None or (not isinstance(type, int)):
+            quantity is None or reward is None or (not isinstance(type_, int)) or (not isinstance(quantity, int)):
         msg += "Illegal_parameter"
         return 400, msg
     if not isinstance(quantity, int):
         msg += "quantity_must_be_int"
+        return 400, msg
+    if quantity <= 0:
+        msg += "quantity_must_larger_than_0"
+        return 400, msg
+
+    if quantity <= 0:
+        msg += "quantity_must_larger_than_0"
+        return 400, msg
+
+    if isinstance(reward, int):
+        reward = float(reward)
+
+    if not isinstance(reward, float):
+        msg += "reward_must_be_a_num"
+        return 400, msg
+    if reward <= 0:
+        msg += "reward_must_larger_than_0"
+        return 400, msg
+    if not match_phone(phone_num):
+        msg += "error_phone"
+        return 400, msg
+
+    t = datetime.datetime.strptime(deadline, "%Y-%m-%d") + datetime.timedelta(days=1)
+    n = datetime.datetime.now()
+    if n > t:
+        msg += "deadline_is_gone"
         return 400, msg
     # if not isinstance(reward, float):
     #    msg += "reward_must_be_float"
@@ -43,7 +70,7 @@ def create_task_model(account):
         return 400, msg
     sql = """INSERT INTO task(sid, type, description, detail, deadline, phone_num, wechat, quantity, reward, status)
                         VALUES ("%s", %d, "%s", "%s", "%s", "%s", "%s", %d, %f, %d);""" % (
-        sid, type, description, detail, deadline, phone_num, wechat, quantity, reward, status)
+        sid, type_, description, detail, deadline, phone_num, wechat, quantity, reward, status)
     tools.modifyOpt(sql)
     reduce_balance_by_sid(session['sid'], cost)
     session['balance'] = session['balance'] - cost
@@ -309,7 +336,7 @@ def select_task_model(account):
     number = int(number)
 
     sql = "SELECT * FROM task where tid not in" \
-          "(SELECT tid FROM task_order where sid = '%s')" % (sid)
+          "(SELECT tid FROM task_order where sid = '%s') and not(quantity = 0)" % (sid)
     rows = tools.selectOpt(sql)
     if rows:
         for i in range(offset, min(len(rows), offset + number)):
