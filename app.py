@@ -18,19 +18,6 @@ app.config['SECRET_KEY'] = os.urandom(24)  # 设置随机字符,每次运行服�
 # app.config['PERMANENT_SESSION_LIFETIME'] = timedelta(days=7)  # 设置session的保存时间
 
 
-# 解决跨域问题
-def jsonResponse(dump_json):
-    '''
-    参数值为已格式化的json
-    返回值为进行包装后的response
-    '''
-    res = make_response(dump_json)
-    res.headers['Access-Control-Allow-Origin'] = '*'
-    res.headers['Access-Control-Allow-Methods'] = 'POST,GET,PUT,DELETE,OPTIONS'
-    res.headers['Access-Control-Allow-Headers'] = 'x-requested-with,content-type'
-    return res
-
-
 """
 用户信息接口
 """
@@ -99,7 +86,7 @@ def edit_userinfo():
 
 
 # 账户充值
-@app.route('/user/recharge', methods=['POST'])
+@app.route('/module/user/recharge', methods=['POST'])
 @login_required_mine
 def user_recharge():
     # sid = session.get('sid')
@@ -108,7 +95,7 @@ def user_recharge():
 
 
 # 账户提现
-@app.route('/user/withdraw', methods=['POST'])
+@app.route('/module/user/withdraw', methods=['POST'])
 @login_required_mine
 def user_withdraw():
     code, msg = user_withdraw_model(request.json)
